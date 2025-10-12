@@ -1,159 +1,49 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>📘 Pengingat PR X-2</title>
-<style>
-body{font-family:'Poppins',sans-serif;background:#0f172a;color:#f1f5f9;margin:0;padding:20px;}
-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
-h1{font-size:1.8em;}
-#loginBtn{background:#3b82f6;border:none;color:white;padding:8px 14px;border-radius:10px;font-weight:bold;cursor:pointer;transition:.3s;}
-#loginBtn:hover{background:#2563eb;}
-.form-box{background:#1e293b;padding:20px;border-radius:15px;max-width:600px;margin:auto;box-shadow:0 0 15px rgba(0,0,0,.3);}
-input,textarea,button{width:100%;margin-top:10px;padding:10px;border-radius:8px;border:none;font-size:1em;}
-input,textarea{background:#334155;color:white;}
-button{background:#3b82f6;color:white;font-weight:bold;cursor:pointer;transition:.3s;}
-button:hover{background:#2563eb;}
-button:disabled{background:#475569;cursor:not-allowed;}
-.hapus-btn{background:#ef4444;}
-.hapus-btn:hover{background:#dc2626;}
-.list-container{margin-top:30px;max-width:600px;margin-left:auto;margin-right:auto;}
-.card{background:#1e293b;padding:15px;border-radius:10px;margin-bottom:10px;}
-.tanggal{color:#93c5fd;font-size:0.9em;}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📘 Pengingat PR X-2 Modern</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<header>
-<h1>📘 Pengingat PR X-2</h1>
-<button id="loginBtn" onclick="loginAdmin()">Login Admin</button>
-</header>
-
-<div class="form-box">
-<input type="text" id="mapel" placeholder="Mata pelajaran" disabled>
-<textarea id="deskripsi" placeholder="Deskripsi PR" disabled></textarea>
-<input type="date" id="tanggal" disabled>
-<button id="tambahBtn" onclick="tambahPR()" disabled>Tambah PR</button>
-<button id="hapusBtn" class="hapus-btn" onclick="hapusSemuaPR()" disabled>🗑️ Hapus Semua PR</button>
-<button id="siarankanBtn" onclick="siarankan()" disabled>📢 Siarankan PR</button>
-</div>
-
-<div class="list-container">
-<h2>📋 Daftar PR Tersimpan:</h2>
-<div id="daftarPR"></div>
-</div>
-
-<!-- ... (kode HTML/CSS tetap, hanya JS saja yang diubah berikut) ... -->
-<script>
-const passwordAdmin = "firman1";
-let adminMode = false;
-const prJsonUrl = "https://raw.githubusercontent.com/Delven-f/pengingatpr1/main/pr.json";
-const backendUrl = "http://localhost:3000/update-pr"; // Ganti jika backend online
-
-// Ambil PR dari GitHub (untuk semua user)
-async function ambilPR() {
-  let data = [];
-  try {
-    const res = await fetch(prJsonUrl + "?t=" + Date.now(), { cache: "no-store" });
-    if (res.ok) data = await res.json();
-  } catch (e) {}
-  tampilkanPR(data);
-  return data;
-}
-
-// Tampilkan ke halaman
-function tampilkanPR(data) {
-  const container = document.getElementById("daftarPR");
-  container.innerHTML = "";
-  if (!data || data.length === 0) {
-    container.innerHTML = "<p>Belum ada PR tersimpan.</p>";
-    return;
-  }
-  data.forEach(pr => {
-    const div = document.createElement("div");
-    div.className = "card";
-    div.innerHTML = `<h3>${pr.mapel}</h3><p>${pr.deskripsi}</p><p class="tanggal">📅 Deadline: ${pr.tanggal}</p>`;
-    container.appendChild(div);
-  });
-}
-
-// Login admin
-function loginAdmin() {
-  const pw = prompt("Masukkan sandi admin:");
-  if (pw === passwordAdmin) {
-    adminMode = true;
-    aktifkanAdmin();
-    alert("✅ Login berhasil! Admin dapat menambah/menghapus PR.");
-    document.getElementById("loginBtn").innerText = "Admin Aktif";
-    document.getElementById("loginBtn").style.background = "#16a34a";
-    ambilPR().then(data=>{
-      document.getElementById("mapel").value = "";
-      document.getElementById("deskripsi").value = "";
-      document.getElementById("tanggal").value = "";
-    });
-  } else alert("❌ Sandi salah!");
-}
-
-function aktifkanAdmin() {
-  document.getElementById("mapel").disabled = false;
-  document.getElementById("deskripsi").disabled = false;
-  document.getElementById("tanggal").disabled = false;
-  document.getElementById("tambahBtn").disabled = false;
-  document.getElementById("hapusBtn").disabled = false;
-  document.getElementById("siarankanBtn").disabled = false;
-}
-
-// Tambah PR, update ke GitHub (melalui backend)
-async function tambahPR() {
-  const mapel = document.getElementById("mapel").value;
-  const deskripsi = document.getElementById("deskripsi").value;
-  const tanggal = document.getElementById("tanggal").value;
-  if (!mapel || !deskripsi || !tanggal) {
-    alert("⚠️ Isi semua kolom!");
-    return;
-  }
-  // Ambil data lama dari GitHub
-  let data = await ambilPR();
-  data.push({ mapel, deskripsi, tanggal });
-  sendToBackend(data, "PR berhasil ditambahkan!");
-  document.getElementById("mapel").value = "";
-  document.getElementById("deskripsi").value = "";
-  document.getElementById("tanggal").value = "";
-}
-
-// Hapus semua PR, update GitHub
-async function hapusSemuaPR() {
-  if (!confirm("⚠️ Yakin hapus semua PR?")) return;
-  sendToBackend([], "Semua PR berhasil dihapus!");
-}
-
-// Siarankan (pakai untuk update manual atau debug)
-function siarankan() {
-  alert("Perubahan sekarang otomatis! Cukup tambah/hapus PR, semua device akan sinkron otomatis.");
-}
-
-// Kirim ke backend untuk update GitHub
-function sendToBackend(data, successMsg) {
-  fetch(backendUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  })
-  .then(res => res.json())
-  .then(res => {
-    if (res.success) {
-      alert("✅ " + successMsg);
-      ambilPR();
-    }
-    else alert("❌ Gagal update PR: " + (res.error || "Unknown error"));
-  })
-  .catch(err => alert("❌ Gagal koneksi ke server!"));
-}
-
-// Saat halaman dibuka, tampilkan PR dari GitHub
-ambilPR();
-</script>
+  <header>
+    <h1>📘 Pengingat PR X-2</h1>
+    <div class="admin-section">
+      <button id="admin-login-btn">🔐 Admin Login</button>
+      <span id="admin-status" class="hidden"></span>
+      <button id="admin-logout-btn" class="hidden">Logout</button>
+    </div>
+  </header>
   
+  <main>
+    <section id="form-section" class="hidden">
+      <h2 id="form-title">Tambah PR Baru</h2>
+      <form id="pr-form">
+        <input type="text" id="mapel" placeholder="Mata pelajaran" required>
+        <textarea id="deskripsi" placeholder="Deskripsi PR" required></textarea>
+        <input type="date" id="tanggal" required>
+        <input type="hidden" id="pr-index">
+        <div class="btn-group">
+          <button type="submit" id="save-btn">Simpan</button>
+          <button type="button" id="cancel-btn" class="hidden">Batal</button>
+        </div>
+      </form>
+    </section>
+    
+    <section>
+      <div class="toolbar">
+        <input type="text" id="search" placeholder="Cari PR..." autocomplete="off">
+        <button id="refresh-btn" title="Refresh data">🔄</button>
+        <button id="clear-btn" class="hidden hapus-btn" title="Hapus Semua PR">🗑️ Hapus Semua</button>
+      </div>
+      <div id="loading" class="loading hidden"></div>
+      <div id="daftarPR"></div>
+    </section>
+  </main>
+  
+  <div id="toast" class="toast hidden"></div>
+  
+  <script src="app.js"></script>
 </body>
 </html>
