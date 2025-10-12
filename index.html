@@ -44,27 +44,29 @@ button:disabled{background:#475569;cursor:not-allowed;}
 <div id="daftarPR"></div>
 </div>
 
+<!-- ... (kode HTML/CSS tetap, hanya JS saja yang diubah berikut) ... -->
 <script>
 const passwordAdmin = "firman1";
 let adminMode = false;
 const prJsonUrl = "https://raw.githubusercontent.com/Delven-f/pengingatpr1/main/pr.json";
+const backendUrl = "http://localhost:3000/update-pr"; // Ganti jika backend online
 
-// Ambil PR dari pr.json di GitHub (public)
+// Ambil PR dari GitHub (untuk semua user)
 async function ambilPR() {
   let data = [];
   try {
-    const res = await fetch(prJsonUrl, { cache: "no-store" });
+    const res = await fetch(prJsonUrl + "?t=" + Date.now(), { cache: "no-store" });
     if (res.ok) data = await res.json();
-  } catch (e) { /* kosongkan jika gagal */ }
+  } catch (e) {}
   tampilkanPR(data);
   return data;
 }
 
-// Tampilkan PR di halaman
+// Tampilkan ke halaman
 function tampilkanPR(data) {
   const container = document.getElementById("daftarPR");
   container.innerHTML = "";
-  if (data.length === 0) {
+  if (!data || data.length === 0) {
     container.innerHTML = "<p>Belum ada PR tersimpan.</p>";
     return;
   }
@@ -76,22 +78,23 @@ function tampilkanPR(data) {
   });
 }
 
-// Login Admin
+// Login admin
 function loginAdmin() {
   const pw = prompt("Masukkan sandi admin:");
   if (pw === passwordAdmin) {
     adminMode = true;
     aktifkanAdmin();
-    alert("✅ Login berhasil! Admin dapat menambah/hapus PR.");
-    const btn = document.getElementById("loginBtn");
-    btn.innerText = "Admin Aktif";
-    btn.style.background = "#16a34a";
-    // Setelah login, load draft lokal jika ada
-    loadDraftLocal();
+    alert("✅ Login berhasil! Admin dapat menambah/menghapus PR.");
+    document.getElementById("loginBtn").innerText = "Admin Aktif";
+    document.getElementById("loginBtn").style.background = "#16a34a";
+    ambilPR().then(data=>{
+      document.getElementById("mapel").value = "";
+      document.getElementById("deskripsi").value = "";
+      document.getElementById("tanggal").value = "";
+    });
   } else alert("❌ Sandi salah!");
 }
 
-// Aktifkan tombol admin
 function aktifkanAdmin() {
   document.getElementById("mapel").disabled = false;
   document.getElementById("deskripsi").disabled = false;
@@ -101,14 +104,8 @@ function aktifkanAdmin() {
   document.getElementById("siarankanBtn").disabled = false;
 }
 
-// Untuk admin: load draft lokal (sementara, sebelum update ke GitHub)
-function loadDraftLocal() {
-  const data = JSON.parse(localStorage.getItem("prList")) || [];
-  tampilkanPR(data);
-}
-
-// Tambah PR (hanya di localStorage - harus update manual ke GitHub)
-function tambahPR() {
+// Tambah PR, update ke GitHub (melalui backend)
+async function tambahPR() {
   const mapel = document.getElementById("mapel").value;
   const deskripsi = document.getElementById("deskripsi").value;
   const tanggal = document.getElementById("tanggal").value;
@@ -116,35 +113,47 @@ function tambahPR() {
     alert("⚠️ Isi semua kolom!");
     return;
   }
-  const data = JSON.parse(localStorage.getItem("prList")) || [];
+  // Ambil data lama dari GitHub
+  let data = await ambilPR();
   data.push({ mapel, deskripsi, tanggal });
-  localStorage.setItem("prList", JSON.stringify(data));
-  tampilkanPR(data);
+  sendToBackend(data, "PR berhasil ditambahkan!");
   document.getElementById("mapel").value = "";
   document.getElementById("deskripsi").value = "";
   document.getElementById("tanggal").value = "";
 }
 
-// Hapus Semua PR (hanya di localStorage - harus update manual ke GitHub)
-function hapusSemuaPR() {
+// Hapus semua PR, update GitHub
+async function hapusSemuaPR() {
   if (!confirm("⚠️ Yakin hapus semua PR?")) return;
-  localStorage.removeItem("prList");
-  tampilkanPR([]);
+  sendToBackend([], "Semua PR berhasil dihapus!");
 }
 
-// Siarkan PR (instruksi update JSON ke GitHub)
+// Siarankan (pakai untuk update manual atau debug)
 function siarankan() {
-  const data = JSON.parse(localStorage.getItem("prList")) || [];
-  if (data.length === 0) {
-    alert("Belum ada PR untuk disiarkan!");
-    return;
-  }
-  alert("📢 Untuk siarkan PR ke semua device:\n1. Buka repo GitHub / Vercel\n2. Update file pr.json dengan data berikut:\n\n" + JSON.stringify(data, null, 2));
+  alert("Perubahan sekarang otomatis! Cukup tambah/hapus PR, semua device akan sinkron otomatis.");
+}
+
+// Kirim ke backend untuk update GitHub
+function sendToBackend(data, successMsg) {
+  fetch(backendUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(res => {
+    if (res.success) {
+      alert("✅ " + successMsg);
+      ambilPR();
+    }
+    else alert("❌ Gagal update PR: " + (res.error || "Unknown error"));
+  })
+  .catch(err => alert("❌ Gagal koneksi ke server!"));
 }
 
 // Saat halaman dibuka, tampilkan PR dari GitHub
 ambilPR();
 </script>
-
+  
 </body>
 </html>
