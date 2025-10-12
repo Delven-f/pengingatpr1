@@ -1,5 +1,5 @@
 // GANTI KE URL BACKEND KAMU!
-const BACKEND_URL = "https://pengingatpr1-production.up.railway.app/update-pr";
+const BACKEND_URL = "https://pengingatpr1-production-e49b.up.railway.app/";
 const PR_JSON_URL = "https://raw.githubusercontent.com/Delven-f/pengingatpr1/main/pr.json";
 
 let adminMode = false;
