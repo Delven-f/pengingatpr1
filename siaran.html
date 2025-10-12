@@ -1,47 +1,40 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>📢 Siaran PR X-2</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📋 Daftar PR X-2</title>
+<style>
+body{font-family:'Poppins',sans-serif;background:#0f172a;color:#f1f5f9;margin:0;padding:20px;}
+.container{max-width:600px;margin:auto;}
+.card{background:#1e293b;padding:15px;border-radius:10px;margin-bottom:10px;}
+.tanggal{color:#93c5fd;font-size:0.9em;}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>📢 SIARAN PENGINGAT PR X-2</h1>
-    <p>Halaman ini menampilkan PR yang telah disiarkan oleh guru/admin.</p>
+<div class="container">
+<h1>📋 Daftar PR X-2</h1>
+<div id="daftarPR"></div>
+</div>
 
-    <div id="pengumuman" class="board"></div>
+<script>
+async function ambilPR(){
+  try{
+    const res = await fetch('pr.json?t='+Date.now());
+    const data = await res.json();
+    const container = document.getElementById('daftarPR');
+    container.innerHTML = "";
+    if(data.length===0){container.innerHTML="<p>Belum ada PR tersimpan.</p>";return;}
+    data.forEach(pr=>{
+      const div = document.createElement('div');
+      div.className="card";
+      div.innerHTML=`<h3>${pr.mapel}</h3><p>${pr.deskripsi}</p><p class="tanggal">📅 Deadline: ${pr.tanggal}</p>`;
+      container.appendChild(div);
+    });
+  }catch(err){console.log("Error fetch PR:",err);}
+}
 
-    <p class="note">🔄 Halaman akan otomatis menyegarkan setiap 5 detik untuk menampilkan PR terbaru.</p>
-  </div>
-
-  <script>
-    const board = document.getElementById('pengumuman');
-
-    function tampilkanPR() {
-      const data = JSON.parse(localStorage.getItem('siaranPR')) || [];
-      board.innerHTML = '';
-
-      if (data.length === 0) {
-        board.innerHTML = '<div class=\"empty\">Belum ada PR yang disiarkan</div>';
-        return;
-      }
-
-      data.forEach(pr => {
-        const div = document.createElement('div');
-        div.className = 'card';
-        div.innerHTML = `
-          <h2>${pr.mapel}</h2>
-          <p>${pr.deskripsi}</p>
-          <p class=\"tanggal\">📅 Deadline: ${pr.tanggal}</p>
-        `;
-        board.appendChild(div);
-      });
-    }
-
-    tampilkanPR();
-    setInterval(tampilkanPR, 5000);
-  </script>
+ambilPR();
+</script>
 </body>
 </html>
