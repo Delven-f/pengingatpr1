@@ -7,7 +7,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const GITHUB_TOKEN = "ISI_TOKEN_GITHUB_MU"; // GANTI dengan token GitHub-mu
+// GANTI dengan token GitHub-mu!
+const GITHUB_TOKEN = "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";
 const REPO_OWNER = "Delven-f";
 const REPO_NAME = "pengingatpr1";
 const FILE_PATH = "pr.json";
