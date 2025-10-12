@@ -1,14 +1,16 @@
-// Ganti ke URL Railway kamu!
-const BACKEND_URL = "pengingatpr1-production.up.railway.app";
+// GANTI KE URL BACKEND KAMU!
+const BACKEND_URL = "https://pengingatpr1-production.up.railway.app/update-pr";
 const PR_JSON_URL = "https://raw.githubusercontent.com/Delven-f/pengingatpr1/main/pr.json";
 
 let adminMode = false;
 let prData = [];
 let loadingTimeout = null;
+let backsoundOn = false;
 
 document.addEventListener("DOMContentLoaded", () => {
   bindUI();
   loadPR();
+  setupBacksound();
 });
 
 function bindUI() {
@@ -19,6 +21,7 @@ function bindUI() {
   qs("#refresh-btn").onclick = loadPR;
   qs("#clear-btn").onclick = handleClearAll;
   qs("#search").oninput = filterList;
+  qs("#backsound-btn").onclick = toggleBacksound;
 }
 
 function qs(s) { return document.querySelector(s); }
@@ -80,7 +83,7 @@ function renderPR(data) {
       div.innerHTML = `
         <b>${pr.mapel}</b>
         <div>${pr.deskripsi}</div>
-        <div class="tanggal">📅 Terakhir dikumpulkan: ${pr.tanggal}</div>
+        <div class="tanggal">📅 Deadline: ${pr.tanggal}</div>
         <div class="actions${adminMode ? "" : " hidden"}">
           <button class="edit" title="Edit" onclick="editPR(${i})">✏️</button>
           <button class="hapus" title="Hapus" onclick="hapusPR(${i})">🗑️</button>
@@ -174,5 +177,29 @@ function showToast(msg, error) {
   toast.style.color = error ? "#fff" : "var(--primary)";
   toast.classList.remove("hidden");
   clearTimeout(loadingTimeout);
-  loadingTimeout = setTimeout(()=>toast.classList.add("hidden"), 2400);
+  loadingTimeout = setTimeout(()=>toast.classList.add("hidden"), 2500);
+}
+
+// === BACKSOUND ===
+function setupBacksound() {
+  const backsound = qs("#backsound");
+  const btn = qs("#backsound-btn");
+  btn.innerHTML = "🔊";
+  backsound.volume = 0.55;
+  backsoundOn = false;
+  btn.onclick = function() {
+    if (!backsoundOn) {
+      backsound.play();
+      backsoundOn = true;
+      btn.innerHTML = "🔈";
+      showToast("Backsound: ON");
+    } else {
+      backsound.pause();
+      backsoundOn = false;
+      btn.innerHTML = "🔊";
+      showToast("Backsound: OFF");
+    }
+  };
+  // Auto play on load (bisa tergantung izin browser)
+  // backsound.play().catch(()=>{});
 }
