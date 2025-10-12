@@ -1,6 +1,5 @@
-// === CONFIG ===
-// Ganti dengan IP backend jika server Node.js di komputer lain
-const BACKEND_URL = "pengingatpr1.railway.internal";
+// Ganti ke URL Railway kamu!
+const BACKEND_URL = "https://YOUR-NAMA-PROJECT.up.railway.app/update-pr";
 const PR_JSON_URL = "https://raw.githubusercontent.com/Delven-f/pengingatpr1/main/pr.json";
 
 let adminMode = false;
@@ -81,7 +80,7 @@ function renderPR(data) {
       div.innerHTML = `
         <b>${pr.mapel}</b>
         <div>${pr.deskripsi}</div>
-        <div class="tanggal">📅 Deadline: ${pr.tanggal}</div>
+        <div class="tanggal">📅 Terakhir dikumpulkan: ${pr.tanggal}</div>
         <div class="actions${adminMode ? "" : " hidden"}">
           <button class="edit" title="Edit" onclick="editPR(${i})">✏️</button>
           <button class="hapus" title="Hapus" onclick="hapusPR(${i})">🗑️</button>
