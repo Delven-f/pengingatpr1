@@ -1,14 +1,14 @@
 const express = require('express');
-const { Octokit } = require("@octokit/rest");
+const { Octokit } = require('@octokit/rest');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+require('dotenv').config();
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// GANTI dengan token GitHub-mu!
-const GITHUB_TOKEN = "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";
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "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";
 const REPO_OWNER = "Delven-f";
 const REPO_NAME = "pengingatpr1";
 const FILE_PATH = "pr.json";
@@ -16,23 +16,20 @@ const FILE_PATH = "pr.json";
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 app.post('/update-pr', async (req, res) => {
-  const prData = req.body; // Array PR
+  const prData = req.body;
   try {
-    // Ambil SHA terakhir pr.json
     const { data } = await octokit.repos.getContent({
       owner: REPO_OWNER,
       repo: REPO_NAME,
       path: FILE_PATH,
     });
-
-    // Update file
     await octokit.repos.createOrUpdateFileContents({
       owner: REPO_OWNER,
       repo: REPO_NAME,
       path: FILE_PATH,
-      message: "Update pr.json otomatis dari web",
+      message: "Update pr.json otomatis dari web modern",
       content: Buffer.from(JSON.stringify(prData, null, 2)).toString('base64'),
-      sha: data.sha
+      sha: data.sha,
     });
     res.json({ success: true });
   } catch (err) {
