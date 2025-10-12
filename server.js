@@ -7,7 +7,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "ISI_TOKEN_GITHUB_PAT_KAMU";
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "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";
 const REPO_OWNER = "Delven-f";
 const REPO_NAME = "pengingatpr1";
 const FILE_PATH = "pr.json";
