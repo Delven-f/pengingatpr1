@@ -1,19 +1,20 @@
 :root {
-  --bg: #0f172a;
-  --bg2: #1e293b;
+  --bg: #0e1628;
+  --bg2: #232f45;
   --fg: #f1f5f9;
   --primary: #3b82f6;
   --primary-dark: #2563eb;
   --danger: #ef4444;
   --danger-dark: #dc2626;
   --accent: #7df9ff;
-  --card: #22304a;
+  --card: #243052;
+  --shadow: 0 2px 16px #0003;
 }
 
 * { box-sizing: border-box; }
 
 body {
-  background: var(--bg);
+  background: linear-gradient(135deg, #0e1628 60%, #3b82f6 100%);
   color: var(--fg);
   font-family: 'Poppins', sans-serif;
   margin: 0; padding: 0;
@@ -25,28 +26,24 @@ header {
   justify-content: space-between;
   align-items: center;
   background: var(--bg2);
-  padding: 16px 24px;
-  box-shadow: 0 2px 8px #0002;
+  padding: 18px 24px;
+  box-shadow: var(--shadow);
+  border-bottom: 2px solid var(--primary);
 }
-
-.admin-section button, .admin-section span {
-  margin-left: 8px;
-}
-
-h1 { margin: 0; font-size: 1.7em; color: var(--accent);}
+.admin-section button, .admin-section span { margin-left: 8px;}
+h1 { margin: 0; font-size: 1.85em; color: var(--accent);}
 h2 { margin-top: 0; color: var(--primary); }
-
-main { max-width: 700px; margin: 32px auto; padding: 0 16px; }
-
+main { max-width: 740px; margin: 38px auto; padding: 0 18px;}
 section { margin-bottom: 32px; }
-
 #form-section {
   background: var(--bg2);
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 20px;
-  box-shadow: 0 2px 12px #0003;
+  box-shadow: var(--shadow);
   margin-bottom: 28px;
+  animation: fadein 0.6s;
 }
+@keyframes fadein { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
 
 input, textarea, button {
   font-size: 1em;
@@ -55,7 +52,6 @@ input, textarea, button {
   margin-top: 8px;
   margin-bottom: 14px;
 }
-
 input, textarea {
   width: 100%;
   background: var(--card);
@@ -64,13 +60,11 @@ input, textarea {
   transition: background 0.2s;
   border: 1.5px solid transparent;
 }
-
 input:focus, textarea:focus {
   outline: none;
   background: #2f3b56;
   border: 1.5px solid var(--primary);
 }
-
 button {
   background: var(--primary);
   color: white;
@@ -80,56 +74,44 @@ button {
   cursor: pointer;
   transition: background 0.2s, transform 0.1s;
 }
-
 button:hover:not(:disabled) { background: var(--primary-dark); transform:scale(1.04); }
 button:disabled { background: #475569; cursor: not-allowed; }
-
 .hapus-btn { background: var(--danger);}
 .hapus-btn:hover:not(:disabled) { background: var(--danger-dark);}
 .btn-group { display: flex; gap: 10px; }
-
 #daftarPR { margin-top: 16px; }
-
 .card {
   background: var(--bg2);
-  box-shadow: 0 2px 8px #0002;
+  box-shadow: var(--shadow);
   border-radius: 10px;
-  padding: 16px;
-  margin-bottom: 12px;
+  padding: 17px;
+  margin-bottom: 13px;
   display: flex;
   flex-direction: column;
   position: relative;
-  transition: box-shadow 0.15s;
+  animation: fadein 0.7s;
 }
-
-.card:hover { box-shadow: 0 4px 16px #0004; }
-
+.card:hover { box-shadow: 0 4px 18px #0005; }
 .card .tanggal { color: var(--accent); font-size: 0.95em;}
 .card .actions {
   position: absolute;
   top: 12px; right: 12px;
   display: flex; gap: 8px;
 }
-
 .card .actions button {
   background: none;
   color: #fff;
   padding: 3px 7px;
   margin: 0;
-  font-size: 1.2em;
+  font-size: 1.23em;
   border: none;
   cursor: pointer;
   transition: color 0.18s;
 }
-
 .card .actions .edit:hover { color: var(--primary);}
 .card .actions .hapus:hover { color: var(--danger);}
-
 .toolbar {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  margin-bottom: 10px;
+  display: flex; gap: 10px; align-items: center; margin-bottom: 10px;
 }
 #search {
   flex: 1;
@@ -137,7 +119,6 @@ button:disabled { background: #475569; cursor: not-allowed; }
   color: var(--fg);
   padding: 8px 10px;
 }
-
 .loading {
   display: flex; align-items: center; justify-content: center;
   padding: 20px; font-size: 1.2em; color: var(--primary);
@@ -154,9 +135,7 @@ button:disabled { background: #475569; cursor: not-allowed; }
   font-size: 1.08em;
   opacity: 0.96;
 }
-
 .hidden { display: none !important; }
-
 @media (max-width: 600px) {
   main { padding: 0 4vw; }
   .card { padding: 12px; }
