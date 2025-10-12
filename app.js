@@ -1,5 +1,5 @@
-const BACKEND_URL = "https://pengingatpr1-production-e49b.up.railway.app/update-pr";
-const PR_JSON_URL = "https://raw.githubusercontent.com/Delven-f/pengingatpr1/main/pr.json";
+cconst BACKEND_URL = "http://localhost:3000/update-pr";
+const PR_JSON_URL = "http://localhost:3000/get-pr";
 
 let adminMode = false;
 let prData = [];
