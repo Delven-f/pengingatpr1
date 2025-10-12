@@ -1,99 +1,109 @@
-:root{
-  --bg:#0e1628;
-  --card:#142032;
-  --accent:#3b82f6;
-  --muted:#94a3b8;
-  --white:#f8fafc;
-  --danger:#ef4444;
-  --shadow: 0 6px 22px rgba(2,6,23,0.6);
+:root {
+  --bg: #0e1628;
+  --card: #18243a;
+  --accent: #3b82f6;
+  --danger: #ef4444;
+  --fg: #f8fafc;
 }
 
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
-  background:linear-gradient(160deg,#071029 0%, #0f172a 60%);
-  color:var(--white);
-  min-height:100vh;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:28px;
+* { box-sizing: border-box; font-family: "Poppins", sans-serif; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
 }
 
-.wrap{
-  width:100%;
-  max-width:880px;
+header {
+  text-align: center;
+}
+header h1 { color: var(--accent); margin-bottom: 10px; }
+#search {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  width: 80%;
+  max-width: 400px;
+  background: var(--card);
+  color: var(--fg);
 }
 
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:18px;
-}
-header h1{margin:0;font-size:1.4rem;color:var(--accent)}
-.header-right button{margin-left:10px}
-
-.card{
-  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  border-radius:12px;
-  padding:16px;
-  box-shadow:var(--shadow);
-  margin-bottom:16px;
+main {
+  width: 100%;
+  max-width: 700px;
+  margin-top: 20px;
 }
 
-#form-section input,#form-section textarea{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid rgba(255,255,255,0.03);
-  background:transparent;
-  color:var(--white);
-  margin-top:8px;
-  resize:vertical;
+h2 { color: var(--accent); }
+
+#form-section {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
 }
-textarea{min-height:80px}
-
-.btn-row{margin-top:10px;display:flex;gap:8px;}
-button{
-  background:var(--accent);
-  color:#fff;
-  border:none;
-  padding:9px 12px;
-  border-radius:8px;
-  cursor:pointer;
-  font-weight:600;
+input, textarea, button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  margin-top: 8px;
 }
-button[disabled]{opacity:0.6;cursor:not-allowed}
-#cancel-btn{background:#64748b}
-#clear-btn{background:var(--danger)}
+textarea { min-height: 60px; }
 
-.toolbar{display:flex;gap:12px;align-items:center}
-#search{padding:9px;border-radius:8px;border:none;background:transparent;color:var(--white);flex:1}
-
-.list .card-item{
-  display:flex;
-  justify-content:space-between;
-  gap:10px;
-  padding:12px;
-  border-radius:8px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));
-  margin-top:10px;
-  align-items:flex-start;
+button {
+  background: var(--accent);
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  margin-top: 8px;
 }
-.list .left{flex:1}
-.tanggal{color:var(--muted);font-size:0.9rem;margin-top:6px}
-.item-actions button{background:transparent;color:var(--white);font-size:1.1rem;margin-left:8px;border:none;cursor:pointer}
+button:hover { background: #2563eb; }
+button.danger { background: var(--danger); }
 
-.loading{padding:14px;text-align:center;color:var(--accent)}
-
-.toast{
-  position:fixed;left:50%;bottom:26px;transform:translateX(-50%);
-  padding:10px 18px;border-radius:10px;background:rgba(2,6,23,0.9);color:var(--white);
-  box-shadow:var(--shadow);
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.card {
+  background: var(--card);
+  border-radius: 10px;
+  padding: 14px;
+  position: relative;
+}
+.card .tanggal { color: #a5b4fc; font-size: 0.9em; margin-top: 4px; }
+.card .actions {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+.card button {
+  width: auto;
+  padding: 6px 10px;
+  margin-left: 6px;
 }
 
-.hidden{display:none}
-footer{text-align:center;color:var(--muted);margin-top:6px;font-size:0.9rem}
-code{background:rgba(255,255,255,0.02);padding:2px 6px;border-radius:6px}
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-weight: 500;
+  box-shadow: 0 2px 10px #0005;
+}
+.hidden { display: none; }
+footer {
+  margin-top: auto;
+  padding: 12px;
+  font-size: 0.9em;
+  color: #94a3b8;
+}
