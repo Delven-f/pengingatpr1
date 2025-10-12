@@ -1,49 +1,40 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📘 Pengingat PR X-2 Modern</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <header>
-    <h1>📘 Pengingat PR X-2</h1>
-    <div class="admin-section">
-      <button id="admin-login-btn">🔐 Admin Login</button>
-      <span id="admin-status" class="hidden"></span>
-      <button id="admin-logout-btn" class="hidden">Logout</button>
-    </div>
-  </header>
-  
-  <main>
-    <section id="form-section" class="hidden">
-      <h2 id="form-title">Tambah PR Baru</h2>
-      <form id="pr-form">
-        <input type="text" id="mapel" placeholder="Mata pelajaran" required>
-        <textarea id="deskripsi" placeholder="Deskripsi PR" required></textarea>
-        <input type="date" id="tanggal" required>
-        <input type="hidden" id="pr-index">
-        <div class="btn-group">
-          <button type="submit" id="save-btn">Simpan</button>
-          <button type="button" id="cancel-btn" class="hidden">Batal</button>
-        </div>
-      </form>
-    </section>
-    
-    <section>
-      <div class="toolbar">
-        <input type="text" id="search" placeholder="Cari PR..." autocomplete="off">
-        <button id="refresh-btn" title="Refresh data">🔄</button>
-        <button id="clear-btn" class="hidden hapus-btn" title="Hapus Semua PR">🗑️ Hapus Semua</button>
-      </div>
-      <div id="loading" class="loading hidden"></div>
-      <div id="daftarPR"></div>
-    </section>
-  </main>
-  
-  <div id="toast" class="toast hidden"></div>
-  
-  <script src="app.js"></script>
-</body>
-</html>
+const express = require('express');
+const { Octokit } = require('@octokit/rest');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(bodyParser.json());
+
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "const REPO_OWNER = "Delven-f";";
+const REPO_OWNER = "Delven-f";
+const REPO_NAME = "pengingatpr1";
+const FILE_PATH = "pr.json";
+
+const octokit = new Octokit({ auth: GITHUB_TOKEN });
+
+app.post('/update-pr', async (req, res) => {
+  const prData = req.body;
+  try {
+    const { data } = await octokit.repos.getContent({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      path: FILE_PATH,
+    });
+    await octokit.repos.createOrUpdateFileContents({
+      owner: REPO_OWNER,
+      repo: REPO_NAME,
+      path: FILE_PATH,
+      message: "Update pr.json dari Railway",
+      content: Buffer.from(JSON.stringify(prData, null, 2)).toString('base64'),
+      sha: data.sha,
+    });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => console.log(`Server listening on port ${PORT}`));
