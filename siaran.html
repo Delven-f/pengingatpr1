@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>📢 Siaran PR X-2</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>📢 SIARAN PENGINGAT PR X-2</h1>
+    <p>Halaman ini menampilkan PR yang telah disiarkan oleh guru/admin.</p>
+
+    <div id="pengumuman" class="board"></div>
+
+    <p class="note">🔄 Halaman akan otomatis menyegarkan setiap 5 detik untuk menampilkan PR terbaru.</p>
+  </div>
+
+  <script>
+    const board = document.getElementById('pengumuman');
+
+    function tampilkanPR() {
+      const data = JSON.parse(localStorage.getItem('siaranPR')) || [];
+      board.innerHTML = '';
+
+      if (data.length === 0) {
+        board.innerHTML = '<div class=\"empty\">Belum ada PR yang disiarkan</div>';
+        return;
+      }
+
+      data.forEach(pr => {
+        const div = document.createElement('div');
+        div.className = 'card';
+        div.innerHTML = `
+          <h2>${pr.mapel}</h2>
+          <p>${pr.deskripsi}</p>
+          <p class=\"tanggal\">📅 Deadline: ${pr.tanggal}</p>
+        `;
+        board.appendChild(div);
+      });
+    }
+
+    tampilkanPR();
+    setInterval(tampilkanPR, 5000);
+  </script>
+</body>
+</html>
