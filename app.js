@@ -1,5 +1,5 @@
 // Ganti ke URL Railway kamu!
-const BACKEND_URL = "https://YOUR-NAMA-PROJECT.up.railway.app/update-pr";
+const BACKEND_URL = "https://delvenploud.app/update-pr";
 const PR_JSON_URL = "https://raw.githubusercontent.com/Delven-f/pengingatpr1/main/pr.json";
 
 let adminMode = false;
