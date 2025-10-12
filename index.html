@@ -4,9 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>📘 Pengingat PR X-2</title>
-<link rel="stylesheet" href="style.css">
 <style>
-/* style sama seperti sebelumnya */
 body{font-family:'Poppins',sans-serif;background:#0f172a;color:#f1f5f9;margin:0;padding:20px;}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
 h1{font-size:1.8em;}
@@ -26,6 +24,7 @@ button:disabled{background:#475569;cursor:not-allowed;}
 </style>
 </head>
 <body>
+
 <header>
 <h1>📘 Pengingat PR X-2</h1>
 <button id="loginBtn" onclick="loginAdmin()">Login Admin</button>
@@ -37,6 +36,7 @@ button:disabled{background:#475569;cursor:not-allowed;}
 <input type="date" id="tanggal" disabled>
 <button id="tambahBtn" onclick="tambahPR()" disabled>Tambah PR</button>
 <button id="hapusBtn" class="hapus-btn" onclick="hapusSemuaPR()" disabled>🗑️ Hapus Semua PR</button>
+<button id="siarankanBtn" onclick="siarankan()" disabled>📢 Siarankan PR</button>
 </div>
 
 <div class="list-container">
@@ -44,89 +44,85 @@ button:disabled{background:#475569;cursor:not-allowed;}
 <div id="daftarPR"></div>
 </div>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <script>
-// ================= CONFIG FIREBASE =================
-const firebaseConfig = {
-  apiKey: "API_KEY_FIREBASE",
-  authDomain: "PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://PROJECT_ID.firebaseio.com",
-  projectId: "PROJECT_ID",
-  storageBucket: "PROJECT_ID.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId: "APP_ID"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// ================= LOGIN ADMIN =================
 const passwordAdmin="firman1";
 let adminMode=false;
 
+// Load PR dari localStorage
+function ambilPR(){
+  const data=JSON.parse(localStorage.getItem("prList"))||[];
+  tampilkanPR(data);
+  return data;
+}
+
+// Tampilkan PR di halaman
+function tampilkanPR(data){
+  const container=document.getElementById("daftarPR");
+  container.innerHTML="";
+  if(data.length===0){container.innerHTML="<p>Belum ada PR tersimpan.</p>";return;}
+  data.forEach(pr=>{
+    const div=document.createElement("div");
+    div.className="card";
+    div.innerHTML=`<h3>${pr.mapel}</h3><p>${pr.deskripsi}</p><p class="tanggal">📅 Deadline: ${pr.tanggal}</p>`;
+    container.appendChild(div);
+  });
+}
+
+// Login Admin
 function loginAdmin(){
   const pw=prompt("Masukkan sandi admin:");
   if(pw===passwordAdmin){
     adminMode=true;
     aktifkanAdmin();
     alert("✅ Login berhasil! Admin dapat menambah/hapus PR.");
-    document.getElementById("loginBtn").innerText="Admin Aktif";
-    document.getElementById("loginBtn").style.background="#16a34a";
-  } else alert("❌ Sandi salah!");
+    const btn=document.getElementById("loginBtn");
+    btn.innerText="Admin Aktif";
+    btn.style.background="#16a34a";
+  }else alert("❌ Sandi salah!");
 }
 
+// Aktifkan tombol admin
 function aktifkanAdmin(){
   document.getElementById("mapel").disabled=false;
   document.getElementById("deskripsi").disabled=false;
   document.getElementById("tanggal").disabled=false;
   document.getElementById("tambahBtn").disabled=false;
   document.getElementById("hapusBtn").disabled=false;
+  document.getElementById("siarankanBtn").disabled=false;
 }
 
-// ================= TAMPILKAN PR =================
-const daftarPR = document.getElementById("daftarPR");
-function tampilkanPR(data){
-  daftarPR.innerHTML="";
-  if(!data || data.length===0){daftarPR.innerHTML="<p>Belum ada PR tersimpan.</p>";return;}
-  data.forEach(pr=>{
-    const div=document.createElement("div");
-    div.className="card";
-    div.innerHTML=`<h3>${pr.mapel}</h3><p>${pr.deskripsi}</p><p class="tanggal">📅 Deadline: ${pr.tanggal}</p>`;
-    daftarPR.appendChild(div);
-  });
-}
-
-// ================= AMBIL DATA REALTIME =================
-db.ref('prList').on('value', snapshot=>{
-  const data = snapshot.val();
-  tampilkanPR(data ? Object.values(data) : []);
-});
-
-// ================= TAMBAH PR =================
+// Tambah PR
 function tambahPR(){
-  if(!adminMode){alert("❌ Hanya admin bisa menambah PR"); return;}
   const mapel=document.getElementById("mapel").value;
   const deskripsi=document.getElementById("deskripsi").value;
   const tanggal=document.getElementById("tanggal").value;
-  if(!mapel || !deskripsi || !tanggal){alert("⚠️ Isi semua kolom!"); return;}
-  
-  const newKey = db.ref().child('prList').push().key;
-  db.ref('prList/' + newKey).set({mapel, deskripsi, tanggal});
+  if(!mapel||!deskripsi||!tanggal){alert("⚠️ Isi semua kolom!");return;}
+  const data=ambilPR();
+  data.push({mapel,deskripsi,tanggal});
+  localStorage.setItem("prList",JSON.stringify(data));
+  tampilkanPR(data);
   document.getElementById("mapel").value="";
   document.getElementById("deskripsi").value="";
   document.getElementById("tanggal").value="";
 }
 
-// ================= HAPUS SEMUA PR =================
+// Hapus Semua PR
 function hapusSemuaPR(){
-  if(!adminMode){alert("❌ Hanya admin bisa hapus PR"); return;}
   if(!confirm("⚠️ Yakin hapus semua PR?")) return;
-  db.ref('prList').remove();
-  alert("🗑️ Semua PR berhasil dihapus!");
+  localStorage.removeItem("prList");
+  tampilkanPR([]);
 }
+
+// Siarkan PR (instruksi update JSON)
+function siarankan(){
+  const data=ambilPR();
+  if(data.length===0){alert("Belum ada PR untuk disiarkan!");return;}
+  alert("📢 Untuk siarkan PR ke semua device:\n1. Buka repo GitHub / Vercel\n2. Update file pr.json dengan data berikut:\n\n"+JSON.stringify(data,null,2));
+}
+
+// Tampilkan PR saat halaman dibuka
+ambilPR();
 </script>
+
 </body>
 </html>
