@@ -36,9 +36,7 @@
       transition: 0.3s;
     }
 
-    #loginBtn:hover {
-      background: #2563eb;
-    }
+    #loginBtn:hover { background: #2563eb; }
 
     .form-box {
       background: #1e293b;
@@ -58,10 +56,7 @@
       font-size: 1em;
     }
 
-    input, textarea {
-      background: #334155;
-      color: white;
-    }
+    input, textarea { background: #334155; color: white; }
 
     button {
       background: #3b82f6;
@@ -71,38 +66,20 @@
       transition: 0.3s;
     }
 
-    button:hover {
-      background: #2563eb;
-    }
+    button:hover { background: #2563eb; }
+    button:disabled { background: #475569; cursor: not-allowed; }
 
-    button:disabled {
-      background: #475569;
-      cursor: not-allowed;
-    }
+    .hapus-btn { background: #ef4444; }
+    .hapus-btn:hover { background: #dc2626; }
 
-    .hapus-btn {
-      background: #ef4444;
-    }
-
-    .hapus-btn:hover {
-      background: #dc2626;
-    }
-
-    .list-container {
-      margin-top: 30px;
-    }
-
+    .list-container { margin-top: 30px; max-width: 600px; margin-left: auto; margin-right: auto; }
     .card {
       background: #1e293b;
       padding: 15px;
       border-radius: 10px;
       margin-bottom: 10px;
     }
-
-    .tanggal {
-      color: #93c5fd;
-      font-size: 0.9em;
-    }
+    .tanggal { color: #93c5fd; font-size: 0.9em; }
   </style>
 </head>
 <body>
@@ -111,6 +88,7 @@
     <button id="loginBtn" onclick="loginAdmin()">Login Admin</button>
   </header>
 
+  <!-- Form admin -->
   <div class="form-box">
     <input type="text" id="mapel" placeholder="Mata pelajaran" disabled>
     <textarea id="deskripsi" placeholder="Deskripsi PR" disabled></textarea>
@@ -120,6 +98,7 @@
     <button id="hapusBtn" class="hapus-btn" onclick="hapusSemuaPR()" disabled>🗑️ Hapus Semua PR</button>
   </div>
 
+  <!-- Daftar PR publik -->
   <div class="list-container">
     <h2>📋 Daftar PR Tersimpan:</h2>
     <div id="daftarPR"></div>
@@ -129,20 +108,20 @@
     const passwordAdmin = "firman1";
     let adminMode = false;
 
+    // Login admin
     function loginAdmin() {
       const pw = prompt("Masukkan sandi admin:");
-      if (pw === passwordAdmin) {
+      if(pw === passwordAdmin){
         adminMode = true;
         aktifkanAdmin();
-        alert("✅ Login berhasil! Sekarang kamu bisa menambah, menyiarkan, atau menghapus PR.");
+        alert("✅ Login berhasil! Admin dapat menambah, menyiarkan, dan menghapus PR.");
         const btn = document.getElementById("loginBtn");
         btn.innerText = "Admin Aktif";
         btn.style.background = "#16a34a";
-      } else {
-        alert("❌ Sandi salah!");
-      }
+      } else { alert("❌ Sandi salah!"); }
     }
 
+    // Aktifkan tombol admin
     function aktifkanAdmin() {
       document.getElementById("mapel").disabled = false;
       document.getElementById("deskripsi").disabled = false;
@@ -152,16 +131,15 @@
       document.getElementById("hapusBtn").disabled = false;
     }
 
+    // Tambah PR
     function tambahPR() {
       const mapel = document.getElementById("mapel").value;
       const deskripsi = document.getElementById("deskripsi").value;
       const tanggal = document.getElementById("tanggal").value;
-
-      if (!mapel || !deskripsi || !tanggal) {
+      if(!mapel || !deskripsi || !tanggal){
         alert("⚠️ Harap isi semua kolom!");
         return;
       }
-
       const prList = JSON.parse(localStorage.getItem("prList")) || [];
       prList.push({ mapel, deskripsi, tanggal });
       localStorage.setItem("prList", JSON.stringify(prList));
@@ -172,9 +150,10 @@
       document.getElementById("tanggal").value = "";
     }
 
+    // Siarkan PR
     function siarkan() {
       const data = localStorage.getItem("prList");
-      if (!data) {
+      if(!data){
         alert("Belum ada PR untuk disiarkan!");
         return;
       }
@@ -182,35 +161,32 @@
       alert("📢 PR berhasil disiarkan ke publik!");
     }
 
-    function hapusSemuaPR() {
-      if (!confirm("⚠️ Yakin mau hapus semua PR tersimpan?")) return;
+    // Hapus semua PR
+    function hapusSemuaPR(){
+      if(!confirm("⚠️ Yakin ingin hapus semua PR tersimpan?")) return;
       localStorage.removeItem("prList");
       tampilkanPR();
       alert("🗑️ Semua PR berhasil dihapus!");
     }
 
-    function tampilkanPR() {
+    // Tampilkan PR publik
+    function tampilkanPR(){
       const data = JSON.parse(localStorage.getItem("prList")) || [];
       const container = document.getElementById("daftarPR");
       container.innerHTML = "";
-
-      if (data.length === 0) {
+      if(data.length === 0){
         container.innerHTML = "<p>Belum ada PR tersimpan.</p>";
         return;
       }
-
-      data.forEach(pr => {
+      data.forEach(pr=>{
         const div = document.createElement("div");
-        div.className = "card";
-        div.innerHTML = `
-          <h3>${pr.mapel}</h3>
-          <p>${pr.deskripsi}</p>
-          <p class="tanggal">📅 Deadline: ${pr.tanggal}</p>
-        `;
+        div.className="card";
+        div.innerHTML = `<h3>${pr.mapel}</h3><p>${pr.deskripsi}</p><p class="tanggal">📅 Deadline: ${pr.tanggal}</p>`;
         container.appendChild(div);
       });
     }
 
+    // Tampilkan PR saat halaman dibuka
     tampilkanPR();
   </script>
 </body>
