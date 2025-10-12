@@ -1,53 +1,40 @@
-const express = require('express');
-const { Octokit } = require('@octokit/rest');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-require('dotenv').config();
+// ======== PENGINGAT PR - SERVER OFFLINE ========
+
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-if (!GITHUB_TOKEN) {
-  console.error("❌ ERROR: GITHUB_TOKEN belum diatur di .env!");
-  process.exit(1);
-}
+const DATA_FILE = path.join(__dirname, "pr.json");
 
-const REPO_OWNER = "Delven-f";
-const REPO_NAME = "pengingatpr1";
-const FILE_PATH = "pr.json";
-
-const octokit = new Octokit({ auth: GITHUB_TOKEN });
-
-app.post('/update-pr', async (req, res) => {
+// 🔹 Endpoint untuk update / simpan PR ke file lokal
+app.post("/update-pr", (req, res) => {
   const prData = req.body;
 
   try {
-    // Dapatkan SHA file terbaru
-    const { data } = await octokit.repos.getContent({
-      owner: REPO_OWNER,
-      repo: REPO_NAME,
-      path: FILE_PATH,
-    });
-
-    await octokit.repos.createOrUpdateFileContents({
-      owner: REPO_OWNER,
-      repo: REPO_NAME,
-      path: FILE_PATH,
-      message: "Update pr.json otomatis dari web",
-      content: Buffer.from(JSON.stringify(prData, null, 2)).toString('base64'),
-      sha: data.sha,
-    });
-
-    res.json({ success: true });
+    fs.writeFileSync(DATA_FILE, JSON.stringify(prData, null, 2));
+    res.json({ success: true, message: "Data berhasil disimpan lokal." });
   } catch (err) {
-    console.error("❌ Gagal update:", err.message);
-    res.status(500).json({ success: false, error: err.message });
+    console.error("❌ Gagal menyimpan:", err);
+    res.status(500).json({ success: false, error: "Gagal menyimpan data." });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () =>
-  console.log(`✅ Server berjalan di http://localhost:${PORT}`)
-);
+// 🔹 Endpoint untuk baca data PR
+app.get("/get-pr", (req, res) => {
+  try {
+    if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, "[]");
+    const data = fs.readFileSync(DATA_FILE);
+    res.json(JSON.parse(data));
+  } catch (err) {
+    res.status(500).json({ success: false, error: "Gagal membaca file." });
+  }
+});
+
+const PORT = 3000;
+app.listen(PORT, () => console.log(`✅ Server lokal aktif di http://localhost:${PORT}`));
