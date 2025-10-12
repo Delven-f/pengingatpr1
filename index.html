@@ -1,40 +1,223 @@
-const express = require('express');
-const { Octokit } = require('@octokit/rest');
-const bodyParser = require('body-parser');
-const cors = require('cors');
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>📘 Pengingat PR X-2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body{background:#0f172a;color:#f1f5f9;font-family:'Poppins',sans-serif;margin:0;padding:0;}
+    header{display:flex;justify-content:space-between;align-items:center;background:#1e293b;padding:14px 18px;}
+    h1{margin:0;font-size:1.5em;color:#7df9ff;}
+    main{max-width:660px;margin:32px auto;padding:0 18px;}
+    .admin-panel{margin:22px 0 14px 0;}
+    .admin-panel input,.admin-panel textarea,.admin-panel button{width:100%;margin-top:7px;padding:8px;border-radius:8px;border:none;font-size:1em;background:#22304a;color:white;}
+    .admin-panel button{background:#3b82f6;font-weight:bold;cursor:pointer;transition:.2s;}
+    .admin-panel button:hover{background:#2563eb;}
+    .admin-panel .danger{background:#ef4444;}
+    .admin-panel .danger:hover{background:#dc2626;}
+    .admin-tools{display:flex;gap:10px;margin-bottom:10px;}
+    .hidden{display:none;}
+    .card{background:#1e293b;padding:14px 18px;border-radius:10px;margin-bottom:12px;position:relative;}
+    .tanggal{color:#7df9ff;font-size:.97em;}
+    .actions{position:absolute;top:14px;right:14px;display:flex;gap:7px;}
+    .actions button{background:none;color:#fff;font-size:1.1em;padding:4px 8px;}
+    .actions button.edit:hover{color:#3b82f6;}
+    .actions button.del:hover{color:#ef4444;}
+    #exportArea{width:100%;height:90px;background:#22304a;color:#fff;margin-top:8px;border-radius:7px;}
+    #loginStatus{font-size:.97em;color:#7df9ff;margin-left:12px;}
+    @media(max-width:600px){main{padding:0 3vw;}.card{padding:11px 8px;}}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📘 Pengingat PR X-2</h1>
+    <div>
+      <button id="loginBtn">🔐 Login Admin</button>
+      <span id="loginStatus" class="hidden">👑 Admin Aktif</span>
+      <button id="logoutBtn" class="hidden">Logout</button>
+    </div>
+  </header>
+  <main>
+    <div class="admin-panel hidden" id="adminPanel">
+      <div id="formTitle"><b>Tambah PR Baru</b></div>
+      <input type="text" id="mapel" placeholder="Mata pelajaran">
+      <textarea id="deskripsi" placeholder="Deskripsi PR"></textarea>
+      <input type="date" id="tanggal">
+      <div class="admin-tools">
+        <button id="saveBtn">Simpan</button>
+        <button id="cancelBtn" class="hidden">Batal Edit</button>
+        <button id="clearBtn" class="danger">Hapus Semua</button>
+        <button id="exportBtn">Ekspor ke GitHub</button>
+      </div>
+      <textarea id="exportArea" readonly class="hidden"></textarea>
+    </div>
+    <h2>📋 Daftar PR</h2>
+    <div id="daftarPR"></div>
+  </main>
+  <script>
+    // === CONFIG ===
+    const PR_JSON_URL = "https://raw.githubusercontent.com/Delven-f/pengingatpr1/main/pr.json";
+    const adminPassword = "firman1";
 
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+    // === STATE ===
+    let prData = [];
+    let adminMode = false;
+    let editIdx = null;
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || "const REPO_OWNER = "Delven-f";";
-const REPO_OWNER = "Delven-f";
-const REPO_NAME = "pengingatpr1";
-const FILE_PATH = "pr.json";
+    // === DOM ===
+    const qs = s => document.querySelector(s);
+    const daftarPR = qs("#daftarPR");
+    const adminPanel = qs("#adminPanel");
+    const loginBtn = qs("#loginBtn");
+    const logoutBtn = qs("#logoutBtn");
+    const loginStatus = qs("#loginStatus");
+    const mapelInput = qs("#mapel");
+    const deskInput = qs("#deskripsi");
+    const tglInput = qs("#tanggal");
+    const saveBtn = qs("#saveBtn");
+    const cancelBtn = qs("#cancelBtn");
+    const clearBtn = qs("#clearBtn");
+    const exportBtn = qs("#exportBtn");
+    const exportArea = qs("#exportArea");
+    const formTitle = qs("#formTitle");
 
-const octokit = new Octokit({ auth: GITHUB_TOKEN });
+    // === INIT ===
+    window.onload = async function() {
+      loadPR();
+    };
 
-app.post('/update-pr', async (req, res) => {
-  const prData = req.body;
-  try {
-    const { data } = await octokit.repos.getContent({
-      owner: REPO_OWNER,
-      repo: REPO_NAME,
-      path: FILE_PATH,
-    });
-    await octokit.repos.createOrUpdateFileContents({
-      owner: REPO_OWNER,
-      repo: REPO_NAME,
-      path: FILE_PATH,
-      message: "Update pr.json dari Railway",
-      content: Buffer.from(JSON.stringify(prData, null, 2)).toString('base64'),
-      sha: data.sha,
-    });
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+    // === AMBIL DATA PR ===
+    async function loadPR() {
+      let data = [];
+      try {
+        const res = await fetch(PR_JSON_URL+"?t="+Date.now());
+        data = await res.json();
+      } catch {}
+      // Cek localStorage utk update terbaru (jika ada, prioritas local)
+      if (localStorage.getItem("my_pr_data")) {
+        try {
+          data = JSON.parse(localStorage.getItem("my_pr_data"));
+        } catch {}
+      }
+      prData = data;
+      renderPR();
+    }
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => console.log(`Server listening on port ${PORT}`));
+    // === TAMPILKAN PR ===
+    function renderPR() {
+      daftarPR.innerHTML = "";
+      if (!prData.length) {
+        daftarPR.innerHTML = "<div class='card'>Belum ada PR tersimpan.</div>";
+        return;
+      }
+      prData.sort((a,b)=>a.tanggal.localeCompare(b.tanggal));
+      prData.forEach((pr,i)=>{
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = `<b>${pr.mapel}</b>
+          <div>${pr.deskripsi}</div>
+          <div class="tanggal">📅 Deadline: ${pr.tanggal}</div>
+          <div class="actions${adminMode?"":" hidden"}">
+            <button class="edit" title="Edit" onclick="editPR(${i})">✏️</button>
+            <button class="del" title="Hapus" onclick="hapusPR(${i})">🗑️</button>
+          </div>`;
+        daftarPR.appendChild(div);
+      });
+    }
+
+    // === ADMIN LOGIN/LOGOUT ===
+    loginBtn.onclick = function() {
+      const pw = prompt("Masukkan sandi admin:");
+      if (pw === adminPassword) {
+        adminMode = true;
+        loginStatus.classList.remove("hidden");
+        adminPanel.classList.remove("hidden");
+        loginBtn.classList.add("hidden");
+        logoutBtn.classList.remove("hidden");
+        renderPR();
+      } else {
+        alert("Sandi salah!");
+      }
+    };
+    logoutBtn.onclick = function() {
+      adminMode = false;
+      loginStatus.classList.add("hidden");
+      adminPanel.classList.add("hidden");
+      loginBtn.classList.remove("hidden");
+      logoutBtn.classList.add("hidden");
+      resetForm();
+      renderPR();
+    };
+
+    // === TAMBAH/EDIT PR ===
+    saveBtn.onclick = function() {
+      const mapel = mapelInput.value.trim();
+      const desk = deskInput.value.trim();
+      const tgl = tglInput.value;
+      if (!mapel||!desk||!tgl) {alert("Isi semua kolom!");return;}
+      if (editIdx!=null) {
+        prData[editIdx]={mapel,deskripsi:desk,tanggal:tgl};
+      } else {
+        prData.push({mapel,deskripsi:desk,tanggal:tgl});
+      }
+      localStorage.setItem("my_pr_data",JSON.stringify(prData));
+      resetForm();
+      renderPR();
+      alert("PR disimpan di browser. Klik 'Ekspor ke GitHub' jika ingin update file di repo.");
+    };
+
+    // === EDIT PR ===
+    window.editPR = function(idx) {
+      const pr = prData[idx];
+      mapelInput.value = pr.mapel;
+      deskInput.value = pr.deskripsi;
+      tglInput.value = pr.tanggal;
+      editIdx = idx;
+      formTitle.innerHTML = "<b>Edit PR</b>";
+      cancelBtn.classList.remove("hidden");
+    };
+
+    // === HAPUS PR ===
+    window.hapusPR = function(idx) {
+      if (!confirm("Yakin hapus PR ini?")) return;
+      prData.splice(idx,1);
+      localStorage.setItem("my_pr_data",JSON.stringify(prData));
+      renderPR();
+      alert("PR dihapus. Klik 'Ekspor ke GitHub' jika ingin update file di repo.");
+    };
+
+    // === HAPUS SEMUA PR ===
+    clearBtn.onclick = function() {
+      if (!confirm("Hapus semua PR?")) return;
+      prData=[];
+      localStorage.setItem("my_pr_data",JSON.stringify(prData));
+      renderPR();
+      alert("Semua PR dihapus. Klik 'Ekspor ke GitHub' jika ingin update file di repo.");
+    };
+
+    // === RESET FORM ===
+    function resetForm() {
+      mapelInput.value="";
+      deskInput.value="";
+      tglInput.value="";
+      editIdx=null;
+      formTitle.innerHTML = "<b>Tambah PR Baru</b>";
+      cancelBtn.classList.add("hidden");
+    }
+    cancelBtn.onclick = resetForm;
+
+    // === EKSPOR KE GITHUB (ADMIN COPY PASTE) ===
+    exportBtn.onclick = function() {
+      exportArea.value = JSON.stringify(prData,null,2);
+      exportArea.classList.remove("hidden");
+      exportArea.select();
+      alert("Copy semua isi JSON di bawah ini lalu paste ke file pr.json di repo GitHub untuk update publik!");
+    };
+
+    // === AGAR F12 TIDAK BISA BUKA PASSWORD ===
+    window.onkeydown = function(e){
+      if(e.key==="F12"||e.ctrlKey&&e.shiftKey&&e.key==="I"){e.preventDefault();}
+    }
+  </script>
+</body>
+</html>
