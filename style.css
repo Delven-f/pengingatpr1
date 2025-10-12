@@ -1,0 +1,92 @@
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #0b132b, #1c2541);
+  color: #e0e8f9;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 700px;
+  margin: 50px auto;
+  background: rgba(255,255,255,0.05);
+  padding: 20px 30px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+h1, h2 {
+  color: #7df9ff;
+}
+
+input, textarea, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
+input, textarea {
+  background: rgba(255,255,255,0.1);
+  color: #fff;
+}
+
+button {
+  background: #1e90ff;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #3aa3ff;
+  transform: scale(1.02);
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+
+ul li {
+  background: rgba(255,255,255,0.07);
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.card {
+  background: rgba(255,255,255,0.08);
+  border-left: 5px solid #7df9ff;
+  padding: 14px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  animation: fadein 0.5s;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.note {
+  font-size: 13px;
+  color: #aaa;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px;
+  color: #ccc;
+  font-style: italic;
+}
+
+.btn-group {
+  display: flex;
+  gap: 10px;
+}
