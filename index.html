@@ -45,82 +45,104 @@ button:disabled{background:#475569;cursor:not-allowed;}
 </div>
 
 <script>
-const passwordAdmin="firman1";
-let adminMode=false;
+const passwordAdmin = "firman1";
+let adminMode = false;
+const prJsonUrl = "https://raw.githubusercontent.com/Delven-f/pengingatpr1/main/pr.json";
 
-// Load PR dari localStorage
-function ambilPR(){
-  const data=JSON.parse(localStorage.getItem("prList"))||[];
+// Ambil PR dari pr.json di GitHub (public)
+async function ambilPR() {
+  let data = [];
+  try {
+    const res = await fetch(prJsonUrl, { cache: "no-store" });
+    if (res.ok) data = await res.json();
+  } catch (e) { /* kosongkan jika gagal */ }
   tampilkanPR(data);
   return data;
 }
 
 // Tampilkan PR di halaman
-function tampilkanPR(data){
-  const container=document.getElementById("daftarPR");
-  container.innerHTML="";
-  if(data.length===0){container.innerHTML="<p>Belum ada PR tersimpan.</p>";return;}
-  data.forEach(pr=>{
-    const div=document.createElement("div");
-    div.className="card";
-    div.innerHTML=`<h3>${pr.mapel}</h3><p>${pr.deskripsi}</p><p class="tanggal">📅 Deadline: ${pr.tanggal}</p>`;
+function tampilkanPR(data) {
+  const container = document.getElementById("daftarPR");
+  container.innerHTML = "";
+  if (data.length === 0) {
+    container.innerHTML = "<p>Belum ada PR tersimpan.</p>";
+    return;
+  }
+  data.forEach(pr => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `<h3>${pr.mapel}</h3><p>${pr.deskripsi}</p><p class="tanggal">📅 Deadline: ${pr.tanggal}</p>`;
     container.appendChild(div);
   });
 }
 
 // Login Admin
-function loginAdmin(){
-  const pw=prompt("Masukkan sandi admin:");
-  if(pw===passwordAdmin){
-    adminMode=true;
+function loginAdmin() {
+  const pw = prompt("Masukkan sandi admin:");
+  if (pw === passwordAdmin) {
+    adminMode = true;
     aktifkanAdmin();
     alert("✅ Login berhasil! Admin dapat menambah/hapus PR.");
-    const btn=document.getElementById("loginBtn");
-    btn.innerText="Admin Aktif";
-    btn.style.background="#16a34a";
-  }else alert("❌ Sandi salah!");
+    const btn = document.getElementById("loginBtn");
+    btn.innerText = "Admin Aktif";
+    btn.style.background = "#16a34a";
+    // Setelah login, load draft lokal jika ada
+    loadDraftLocal();
+  } else alert("❌ Sandi salah!");
 }
 
 // Aktifkan tombol admin
-function aktifkanAdmin(){
-  document.getElementById("mapel").disabled=false;
-  document.getElementById("deskripsi").disabled=false;
-  document.getElementById("tanggal").disabled=false;
-  document.getElementById("tambahBtn").disabled=false;
-  document.getElementById("hapusBtn").disabled=false;
-  document.getElementById("siarankanBtn").disabled=false;
+function aktifkanAdmin() {
+  document.getElementById("mapel").disabled = false;
+  document.getElementById("deskripsi").disabled = false;
+  document.getElementById("tanggal").disabled = false;
+  document.getElementById("tambahBtn").disabled = false;
+  document.getElementById("hapusBtn").disabled = false;
+  document.getElementById("siarankanBtn").disabled = false;
 }
 
-// Tambah PR
-function tambahPR(){
-  const mapel=document.getElementById("mapel").value;
-  const deskripsi=document.getElementById("deskripsi").value;
-  const tanggal=document.getElementById("tanggal").value;
-  if(!mapel||!deskripsi||!tanggal){alert("⚠️ Isi semua kolom!");return;}
-  const data=ambilPR();
-  data.push({mapel,deskripsi,tanggal});
-  localStorage.setItem("prList",JSON.stringify(data));
+// Untuk admin: load draft lokal (sementara, sebelum update ke GitHub)
+function loadDraftLocal() {
+  const data = JSON.parse(localStorage.getItem("prList")) || [];
   tampilkanPR(data);
-  document.getElementById("mapel").value="";
-  document.getElementById("deskripsi").value="";
-  document.getElementById("tanggal").value="";
 }
 
-// Hapus Semua PR
-function hapusSemuaPR(){
-  if(!confirm("⚠️ Yakin hapus semua PR?")) return;
+// Tambah PR (hanya di localStorage - harus update manual ke GitHub)
+function tambahPR() {
+  const mapel = document.getElementById("mapel").value;
+  const deskripsi = document.getElementById("deskripsi").value;
+  const tanggal = document.getElementById("tanggal").value;
+  if (!mapel || !deskripsi || !tanggal) {
+    alert("⚠️ Isi semua kolom!");
+    return;
+  }
+  const data = JSON.parse(localStorage.getItem("prList")) || [];
+  data.push({ mapel, deskripsi, tanggal });
+  localStorage.setItem("prList", JSON.stringify(data));
+  tampilkanPR(data);
+  document.getElementById("mapel").value = "";
+  document.getElementById("deskripsi").value = "";
+  document.getElementById("tanggal").value = "";
+}
+
+// Hapus Semua PR (hanya di localStorage - harus update manual ke GitHub)
+function hapusSemuaPR() {
+  if (!confirm("⚠️ Yakin hapus semua PR?")) return;
   localStorage.removeItem("prList");
   tampilkanPR([]);
 }
 
-// Siarkan PR (instruksi update JSON)
-function siarankan(){
-  const data=ambilPR();
-  if(data.length===0){alert("Belum ada PR untuk disiarkan!");return;}
-  alert("📢 Untuk siarkan PR ke semua device:\n1. Buka repo GitHub / Vercel\n2. Update file pr.json dengan data berikut:\n\n"+JSON.stringify(data,null,2));
+// Siarkan PR (instruksi update JSON ke GitHub)
+function siarankan() {
+  const data = JSON.parse(localStorage.getItem("prList")) || [];
+  if (data.length === 0) {
+    alert("Belum ada PR untuk disiarkan!");
+    return;
+  }
+  alert("📢 Untuk siarkan PR ke semua device:\n1. Buka repo GitHub / Vercel\n2. Update file pr.json dengan data berikut:\n\n" + JSON.stringify(data, null, 2));
 }
 
-// Tampilkan PR saat halaman dibuka
+// Saat halaman dibuka, tampilkan PR dari GitHub
 ambilPR();
 </script>
 
