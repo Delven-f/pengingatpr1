@@ -1,10 +1,9 @@
-// GANTI KE URL BACKEND KAMU!
 const BACKEND_URL = "https://pengingatpr1-production-e49b.up.railway.app/update-pr";
 const PR_JSON_URL = "https://raw.githubusercontent.com/Delven-f/pengingatpr1/main/pr.json";
 
 let adminMode = false;
 let prData = [];
-let loadingTimeout = null;
+let toastTimeout = null;
 let backsoundOn = false;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -12,6 +11,9 @@ document.addEventListener("DOMContentLoaded", () => {
   loadPR();
   setupBacksound();
 });
+
+function qs(s) { return document.querySelector(s); }
+function qsa(s) { return document.querySelectorAll(s); }
 
 function bindUI() {
   qs("#admin-login-btn").onclick = adminLogin;
@@ -21,11 +23,7 @@ function bindUI() {
   qs("#refresh-btn").onclick = loadPR;
   qs("#clear-btn").onclick = handleClearAll;
   qs("#search").oninput = filterList;
-  qs("#backsound-btn").onclick = toggleBacksound;
 }
-
-function qs(s) { return document.querySelector(s); }
-function qsa(s) { return document.querySelectorAll(s); }
 
 function adminLogin() {
   const pw = prompt("Masukkan sandi admin:");
@@ -33,49 +31,55 @@ function adminLogin() {
     adminMode = true;
     showAdminUI();
     showToast("Login admin berhasil.");
-  } else {
-    showToast("Sandi salah!", true);
-  }
+  } else showToast("Sandi salah!", true);
 }
+
 function adminLogout() {
   adminMode = false;
   showAdminUI();
   resetForm();
   showToast("Logout admin.");
 }
+
 function showAdminUI() {
   qs("#form-section").classList.toggle("hidden", !adminMode);
   qs("#clear-btn").classList.toggle("hidden", !adminMode);
   qs("#admin-login-btn").classList.toggle("hidden", adminMode);
-  qs("#admin-status").classList.toggle("hidden", !adminMode);
-  qs("#admin-status").innerText = adminMode ? "👑 Admin Aktif" : "";
   qs("#admin-logout-btn").classList.toggle("hidden", !adminMode);
-  qsa(".actions").forEach(act => act.classList.toggle("hidden", !adminMode));
+  qs("#admin-status").innerText = adminMode ? "👑 Admin Aktif" : "";
+  qsa(".actions").forEach(el => el.classList.toggle("hidden", !adminMode));
 }
 
 async function loadPR() {
   setLoading(true);
   try {
     const res = await fetch(PR_JSON_URL + "?t=" + Date.now());
+    if (!res.ok) throw new Error("Gagal ambil data!");
     prData = await res.json();
     renderPR(prData);
-    setLoading(false);
   } catch (e) {
-    setLoading(false);
-    renderPR([]);
     showToast("Gagal memuat data PR!", true);
+    renderPR([]);
+  } finally {
+    setLoading(false);
   }
 }
+
 function renderPR(data) {
   const container = qs("#daftarPR");
   container.innerHTML = "";
-  if (!data || !data.length) {
+  if (!data.length) {
     container.innerHTML = "<div class='card empty'>Belum ada PR tersimpan.</div>";
     return;
   }
-  let keyword = qs("#search").value.trim().toLowerCase();
+
+  const keyword = qs("#search").value.trim().toLowerCase();
   data
-    .filter(pr => !keyword || pr.mapel.toLowerCase().includes(keyword) || pr.deskripsi.toLowerCase().includes(keyword))
+    .filter(pr =>
+      !keyword ||
+      pr.mapel.toLowerCase().includes(keyword) ||
+      pr.deskripsi.toLowerCase().includes(keyword)
+    )
     .sort((a, b) => a.tanggal.localeCompare(b.tanggal))
     .forEach((pr, i) => {
       const div = document.createElement("div");
@@ -84,41 +88,46 @@ function renderPR(data) {
         <b>${pr.mapel}</b>
         <div>${pr.deskripsi}</div>
         <div class="tanggal">📅 Deadline: ${pr.tanggal}</div>
-        <div class="actions${adminMode ? "" : " hidden"}">
-          <button class="edit" title="Edit" onclick="editPR(${i})">✏️</button>
-          <button class="hapus" title="Hapus" onclick="hapusPR(${i})">🗑️</button>
+        <div class="actions ${adminMode ? "" : "hidden"}">
+          <button onclick="editPR(${i})">✏️</button>
+          <button onclick="hapusPR(${i})">🗑️</button>
         </div>
       `;
       container.appendChild(div);
     });
 }
 
-window.editPR = function(idx) {
-  const pr = prData[idx];
+window.editPR = function(i) {
+  const pr = prData[i];
   qs("#form-title").innerText = "Edit PR";
   qs("#mapel").value = pr.mapel;
   qs("#deskripsi").value = pr.deskripsi;
   qs("#tanggal").value = pr.tanggal;
-  qs("#pr-index").value = idx;
+  qs("#pr-index").value = i;
   qs("#cancel-btn").classList.remove("hidden");
-  qs("#form-section").scrollIntoView({ behavior: 'smooth' });
-}
-window.hapusPR = function(idx) {
+  qs("#form-section").scrollIntoView({ behavior: "smooth" });
+};
+
+window.hapusPR = function(i) {
   if (!confirm("Yakin hapus PR ini?")) return;
-  prData.splice(idx,1);
+  prData.splice(i, 1);
   savePR("PR dihapus.");
-}
+};
+
 function handleClearAll() {
-  if (!confirm("Yakin hapus SEMUA PR?")) return;
+  if (!confirm("Yakin hapus semua PR?")) return;
   prData = [];
   savePR("Semua PR dihapus!");
 }
+
 function handleFormSubmit(e) {
   e.preventDefault();
   const mapel = qs("#mapel").value.trim();
   const deskripsi = qs("#deskripsi").value.trim();
   const tanggal = qs("#tanggal").value;
-  if (!mapel || !deskripsi || !tanggal) return showToast("Isi semua kolom!", true);
+
+  if (!mapel || !deskripsi || !tanggal)
+    return showToast("Isi semua kolom!", true);
 
   const idx = qs("#pr-index").value;
   if (idx !== "") {
@@ -130,6 +139,7 @@ function handleFormSubmit(e) {
   }
   resetForm();
 }
+
 function resetForm() {
   qs("#form-title").innerText = "Tambah PR Baru";
   qs("#mapel").value = "";
@@ -139,67 +149,55 @@ function resetForm() {
   qs("#cancel-btn").classList.add("hidden");
 }
 
-function savePR(successMsg) {
+function savePR(msg) {
   setLoading(true);
   fetch(BACKEND_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(prData)
   })
-  .then(res => res.json())
-  .then(res => {
-    setLoading(false);
-    if (res.success) {
-      showToast(successMsg);
-      loadPR();
-    } else {
-      showToast("Gagal update PR: " + (res.error || ""), true);
-    }
-  })
-  .catch(() => {
-    setLoading(false);
-    showToast("Gagal koneksi ke server!", true);
-  });
+    .then(async res => {
+      if (!res.ok) throw new Error(await res.text());
+      const data = await res.json();
+      if (data.success) {
+        showToast(msg);
+        loadPR();
+      } else throw new Error(data.error || "Gagal update PR");
+    })
+    .catch(e => showToast("Gagal koneksi ke server! " + e.message, true))
+    .finally(() => setLoading(false));
 }
-
-function filterList() { renderPR(prData); }
 
 function setLoading(state) {
-  const loader = qs("#loading");
-  loader.classList.toggle("hidden", !state);
-  loader.textContent = state ? "Loading..." : "";
+  const el = qs("#loading");
+  el.classList.toggle("hidden", !state);
+  el.textContent = state ? "Loading..." : "";
 }
 
-function showToast(msg, error) {
+function showToast(msg, err = false) {
   const toast = qs("#toast");
   toast.innerText = msg;
-  toast.style.background = error ? "var(--danger)" : "var(--bg2)";
-  toast.style.color = error ? "#fff" : "var(--primary)";
+  toast.style.background = err ? "var(--danger)" : "var(--bg2)";
   toast.classList.remove("hidden");
-  clearTimeout(loadingTimeout);
-  loadingTimeout = setTimeout(()=>toast.classList.add("hidden"), 2500);
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => toast.classList.add("hidden"), 2500);
 }
 
-// === BACKSOUND ===
 function setupBacksound() {
   const backsound = qs("#backsound");
   const btn = qs("#backsound-btn");
-  btn.innerHTML = "🔊";
   backsound.volume = 0.55;
-  backsoundOn = false;
-  btn.onclick = function() {
-    if (!backsoundOn) {
-      backsound.play();
-      backsoundOn = true;
+
+  btn.onclick = () => {
+    backsoundOn = !backsoundOn;
+    if (backsoundOn) {
+      backsound.play().catch(() => {});
       btn.innerHTML = "🔈";
       showToast("Backsound: ON");
     } else {
       backsound.pause();
-      backsoundOn = false;
       btn.innerHTML = "🔊";
       showToast("Backsound: OFF");
     }
   };
-  // Auto play on load (bisa tergantung izin browser)
-  // backsound.play().catch(()=>{});
 }
