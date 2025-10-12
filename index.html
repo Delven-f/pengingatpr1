@@ -80,6 +80,14 @@
       cursor: not-allowed;
     }
 
+    .hapus-btn {
+      background: #ef4444;
+    }
+
+    .hapus-btn:hover {
+      background: #dc2626;
+    }
+
     .list-container {
       margin-top: 30px;
     }
@@ -109,6 +117,7 @@
     <input type="date" id="tanggal" disabled>
     <button id="tambahBtn" onclick="tambahPR()" disabled>Tambah PR</button>
     <button id="siarankanBtn" onclick="siarkan()" disabled>📢 Siarankan</button>
+    <button id="hapusBtn" class="hapus-btn" onclick="hapusSemuaPR()" disabled>🗑️ Hapus Semua PR</button>
   </div>
 
   <div class="list-container">
@@ -125,9 +134,10 @@
       if (pw === passwordAdmin) {
         adminMode = true;
         aktifkanAdmin();
-        alert("✅ Login berhasil! Sekarang kamu bisa menambah atau menyiarkan PR.");
-        document.getElementById("loginBtn").innerText = "Admin Aktif";
-        document.getElementById("loginBtn").style.background = "#16a34a";
+        alert("✅ Login berhasil! Sekarang kamu bisa menambah, menyiarkan, atau menghapus PR.");
+        const btn = document.getElementById("loginBtn");
+        btn.innerText = "Admin Aktif";
+        btn.style.background = "#16a34a";
       } else {
         alert("❌ Sandi salah!");
       }
@@ -139,6 +149,7 @@
       document.getElementById("tanggal").disabled = false;
       document.getElementById("tambahBtn").disabled = false;
       document.getElementById("siarankanBtn").disabled = false;
+      document.getElementById("hapusBtn").disabled = false;
     }
 
     function tambahPR() {
@@ -169,6 +180,13 @@
       }
       localStorage.setItem("siaranPR", data);
       alert("📢 PR berhasil disiarkan ke publik!");
+    }
+
+    function hapusSemuaPR() {
+      if (!confirm("⚠️ Yakin mau hapus semua PR tersimpan?")) return;
+      localStorage.removeItem("prList");
+      tampilkanPR();
+      alert("🗑️ Semua PR berhasil dihapus!");
     }
 
     function tampilkanPR() {
