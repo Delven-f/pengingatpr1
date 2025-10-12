@@ -2,7 +2,6 @@ const express = require('express');
 const { Octokit } = require('@octokit/rest');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-require('dotenv').config();
 
 const app = express();
 app.use(cors());
@@ -27,7 +26,7 @@ app.post('/update-pr', async (req, res) => {
       owner: REPO_OWNER,
       repo: REPO_NAME,
       path: FILE_PATH,
-      message: "Update pr.json otomatis dari web modern",
+      message: "Update pr.json dari Railway",
       content: Buffer.from(JSON.stringify(prData, null, 2)).toString('base64'),
       sha: data.sha,
     });
@@ -37,4 +36,5 @@ app.post('/update-pr', async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log('Server listening on port 3000'));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, '0.0.0.0', () => console.log(`Server listening on port ${PORT}`));
