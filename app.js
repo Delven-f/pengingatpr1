@@ -1,6 +1,6 @@
 // === CONFIG ===
 // Ganti dengan IP backend jika server Node.js di komputer lain
-const BACKEND_URL = "http://localhost:3000/update-pr";
+const BACKEND_URL = "http://192.168.0.100:3000/update-pr";
 const PR_JSON_URL = "https://raw.githubusercontent.com/Delven-f/pengingatpr1/main/pr.json";
 
 let adminMode = false;
