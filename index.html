@@ -6,6 +6,7 @@
 <title>📘 Pengingat PR X-2</title>
 <link rel="stylesheet" href="style.css">
 <style>
+/* style sama seperti sebelumnya */
 body{font-family:'Poppins',sans-serif;background:#0f172a;color:#f1f5f9;margin:0;padding:20px;}
 header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
 h1{font-size:1.8em;}
@@ -43,25 +44,40 @@ button:disabled{background:#475569;cursor:not-allowed;}
 <div id="daftarPR"></div>
 </div>
 
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
+// ================= CONFIG FIREBASE =================
+const firebaseConfig = {
+  apiKey: "API_KEY_FIREBASE",
+  authDomain: "PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://PROJECT_ID.firebaseio.com",
+  projectId: "PROJECT_ID",
+  storageBucket: "PROJECT_ID.appspot.com",
+  messagingSenderId: "SENDER_ID",
+  appId: "APP_ID"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// ================= LOGIN ADMIN =================
 const passwordAdmin="firman1";
 let adminMode=false;
-const jsonURL="pr.json";
 
-// Login admin
 function loginAdmin(){
   const pw=prompt("Masukkan sandi admin:");
   if(pw===passwordAdmin){
     adminMode=true;
     aktifkanAdmin();
     alert("✅ Login berhasil! Admin dapat menambah/hapus PR.");
-    const btn=document.getElementById("loginBtn");
-    btn.innerText="Admin Aktif";
-    btn.style.background="#16a34a";
-  }else alert("❌ Sandi salah!");
+    document.getElementById("loginBtn").innerText="Admin Aktif";
+    document.getElementById("loginBtn").style.background="#16a34a";
+  } else alert("❌ Sandi salah!");
 }
 
-// Aktifkan tombol admin
 function aktifkanAdmin(){
   document.getElementById("mapel").disabled=false;
   document.getElementById("deskripsi").disabled=false;
@@ -70,62 +86,47 @@ function aktifkanAdmin(){
   document.getElementById("hapusBtn").disabled=false;
 }
 
-// Ambil PR dari file JSON
-async function ambilPR(){
-  try{
-    const res=await fetch(jsonURL+"?t="+Date.now());
-    const data=await res.json();
-    tampilkanPR(data);
-    return data;
-  }catch(err){console.log("Error fetch PR:",err);return[];}
-}
-
-// Tampilkan PR di halaman
+// ================= TAMPILKAN PR =================
+const daftarPR = document.getElementById("daftarPR");
 function tampilkanPR(data){
-  const container=document.getElementById("daftarPR");
-  container.innerHTML="";
-  if(data.length===0){container.innerHTML="<p>Belum ada PR tersimpan.</p>";return;}
+  daftarPR.innerHTML="";
+  if(!data || data.length===0){daftarPR.innerHTML="<p>Belum ada PR tersimpan.</p>";return;}
   data.forEach(pr=>{
     const div=document.createElement("div");
     div.className="card";
     div.innerHTML=`<h3>${pr.mapel}</h3><p>${pr.deskripsi}</p><p class="tanggal">📅 Deadline: ${pr.tanggal}</p>`;
-    container.appendChild(div);
+    daftarPR.appendChild(div);
   });
 }
 
-// Tambah PR (Admin)
-async function tambahPR(){
+// ================= AMBIL DATA REALTIME =================
+db.ref('prList').on('value', snapshot=>{
+  const data = snapshot.val();
+  tampilkanPR(data ? Object.values(data) : []);
+});
+
+// ================= TAMBAH PR =================
+function tambahPR(){
+  if(!adminMode){alert("❌ Hanya admin bisa menambah PR"); return;}
   const mapel=document.getElementById("mapel").value;
   const deskripsi=document.getElementById("deskripsi").value;
   const tanggal=document.getElementById("tanggal").value;
-  if(!mapel||!deskripsi||!tanggal){alert("⚠️ Isi semua kolom!");return;}
+  if(!mapel || !deskripsi || !tanggal){alert("⚠️ Isi semua kolom!"); return;}
   
-  const data=await ambilPR();
-  data.push({mapel,deskripsi,tanggal});
-  await simpanPR(data);
-  alert("✅ PR berhasil ditambahkan!");
-  tampilkanPR(data);
+  const newKey = db.ref().child('prList').push().key;
+  db.ref('prList/' + newKey).set({mapel, deskripsi, tanggal});
   document.getElementById("mapel").value="";
   document.getElementById("deskripsi").value="";
   document.getElementById("tanggal").value="";
 }
 
-// Hapus semua PR (Admin)
-async function hapusSemuaPR(){
+// ================= HAPUS SEMUA PR =================
+function hapusSemuaPR(){
+  if(!adminMode){alert("❌ Hanya admin bisa hapus PR"); return;}
   if(!confirm("⚠️ Yakin hapus semua PR?")) return;
-  await simpanPR([]);
-  tampilkanPR([]);
-  alert("🗑️ Semua PR dihapus!");
+  db.ref('prList').remove();
+  alert("🗑️ Semua PR berhasil dihapus!");
 }
-
-// Simpan PR ke file JSON (Vercel + GitHub Pages)
-async function simpanPR(data){
-  if(!adminMode){alert("❌ Hanya admin bisa menyimpan PR!");return;}
-  alert("⚠️ Untuk versi GitHub Pages/Vercel statis, admin harus update file pr.json di repo agar PR tersimpan online.\nDi versi backend (Firebase/Supabase) bisa auto update.");
-}
-
-// Load PR awal
-ambilPR();
 </script>
 </body>
 </html>
