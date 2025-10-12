@@ -1,97 +1,127 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pengingat PR X-2 — ADMIN</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔐 Admin Pengingat PR X-2</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #101820;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .login-box, .admin-box {
+      background: #1f2937;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      width: 90%;
+      max-width: 400px;
+    }
+    h1 { text-align: center; }
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 10px;
+      border: none;
+    }
+    input, textarea {
+      background: #374151;
+      color: white;
+    }
+    button {
+      background: #3b82f6;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    button:hover { background: #2563eb; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📘 Pengingat PR X-2 — Admin</h1>
-    <p>Masukkan tugas PR, atur tanggal, lalu tekan <b>Siarankan</b> agar muncul di halaman <code>x-2 community</code>.</p>
+  <div id="login" class="login-box">
+    <h1>🔐 Login Admin</h1>
+    <input type="password" id="password" placeholder="Masukkan sandi admin">
+    <button onclick="login()">Masuk</button>
+  </div>
 
-    <form id="formPR">
-      <label>Mata Pelajaran</label>
-      <input type="text" id="mapel" placeholder="Contoh: Biologi" required>
-
-      <label>Deskripsi PR</label>
-      <textarea id="deskripsi" placeholder="Contoh: Membawa buah jangan lupa" required></textarea>
-
-      <label>Tanggal (Deadline)</label>
-      <input type="date" id="tanggal" required>
-
-      <button type="submit">💾 Simpan PR</button>
-    </form>
-
-    <hr>
-
-    <h2>📋 Daftar PR Tersimpan</h2>
-    <ul id="listPR"></ul>
-
-    <div class="btn-group">
-      <button id="siarankan">📢 Siarankan ke Publik</button>
-      <button id="hapus">🗑️ Hapus Semua</button>
-    </div>
-
-    <p class="note">CODER : FIRMAN R.P
-      Tips: File ini otomatis menyimpan data di browser (localStorage). Untuk menampilkan, buka <b>siaran.html</b>.</p>
+  <div id="admin" class="admin-box" style="display:none;">
+    <h1>📘 Tambah PR X-2</h1>
+    <input type="text" id="mapel" placeholder="Mata pelajaran">
+    <textarea id="deskripsi" placeholder="Deskripsi PR"></textarea>
+    <input type="date" id="tanggal">
+    <button onclick="tambahPR()">Tambah PR</button>
+    <button onclick="siarkan()">📢 Siarankan</button>
+    <button onclick="logout()" style="background:#ef4444;">Keluar</button>
   </div>
 
   <script>
-    const form = document.getElementById('formPR');
-    const list = document.getElementById('listPR');
-    const siarankan = document.getElementById('siarankan');
-    const hapus = document.getElementById('hapus');
+    const passwordBenar = "firman1";
 
-    // Ambil PR dari localStorage
-    let daftarPR = JSON.parse(localStorage.getItem('daftarPR')) || [];
-
-    // Fungsi render daftar PR
-    function renderPR() {
-      list.innerHTML = '';
-      if (daftarPR.length === 0) {
-        list.innerHTML = '<li><em>Belum ada PR disimpan</em></li>';
-        return;
+    function login() {
+      const pw = document.getElementById("password").value;
+      if (pw === passwordBenar) {
+        sessionStorage.setItem("admin", "true");
+        tampilkanAdmin();
+      } else {
+        alert("❌ Password salah!");
       }
-      daftarPR.forEach((pr, i) => {
-        const li = document.createElement('li');
-        li.innerHTML = `<b>${pr.mapel}</b> — ${pr.deskripsi} <small>[${pr.tanggal}]</small>`;
-        list.appendChild(li);
-      });
     }
 
-    // Saat form disubmit
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const pr = {
-        mapel: mapel.value.trim(),
-        deskripsi: deskripsi.value.trim(),
-        tanggal: tanggal.value
-      };
-      daftarPR.push(pr);
-      localStorage.setItem('daftarPR', JSON.stringify(daftarPR));
-      renderPR();
-      form.reset();
-    });
+    function tampilkanAdmin() {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("admin").style.display = "block";
+    }
 
-    // Tombol siaran → simpan ke localStorage publik
-    siarankan.addEventListener('click', () => {
-      localStorage.setItem('siaranPR', JSON.stringify(daftarPR));
-      alert('✅ PR telah disiarkan! Cek di siaran.html');
-    });
+    function logout() {
+      sessionStorage.removeItem("admin");
+      location.reload();
+    }
 
-    // Tombol hapus semua
-    hapus.addEventListener('click', () => {
-      if (confirm('Yakin hapus semua PR?')) {
-        daftarPR = [];
-        localStorage.removeItem('daftarPR');
-        localStorage.removeItem('siaranPR');
-        renderPR();
+    function cekLogin() {
+      if (sessionStorage.getItem("admin") === "true") {
+        tampilkanAdmin();
       }
-    });
+    }
 
-    renderPR();
+    function tambahPR() {
+      const mapel = document.getElementById("mapel").value;
+      const deskripsi = document.getElementById("deskripsi").value;
+      const tanggal = document.getElementById("tanggal").value;
+
+      if (!mapel || !deskripsi || !tanggal) {
+        alert("Isi semua kolom dulu ya!");
+        return;
+      }
+
+      const prList = JSON.parse(localStorage.getItem("prList")) || [];
+      prList.push({ mapel, deskripsi, tanggal });
+      localStorage.setItem("prList", JSON.stringify(prList));
+
+      alert("✅ PR berhasil ditambahkan!");
+      document.getElementById("mapel").value = "";
+      document.getElementById("deskripsi").value = "";
+      document.getElementById("tanggal").value = "";
+    }
+
+    function siarkan() {
+      const data = localStorage.getItem("prList");
+      if (!data) {
+        alert("Belum ada PR untuk disiarkan!");
+        return;
+      }
+      localStorage.setItem("siaranPR", data);
+      alert("📢 PR berhasil disiarkan ke publik!");
+    }
+
+    cekLogin();
   </script>
 </body>
 </html>
