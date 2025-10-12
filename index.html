@@ -1,62 +1,43 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>📘 Pengingat PR - Offline</title>
-  <link rel="stylesheet" href="/style.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📘 Pengingat PR Offline</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <h1>📘 Pengingat PR</h1>
-      <div class="header-right">
-        <button id="backsound-btn" title="Toggle backsound">🔊</button>
-        <button id="admin-login-btn">🔐 Admin</button>
-        <span id="admin-status" class="hidden">👑 Admin Aktif</span>
-      </div>
-    </header>
+  <header>
+    <h1>📘 Pengingat PR Offline</h1>
+    <input type="text" id="search" placeholder="Cari mapel..." />
+  </header>
 
-    <main>
-      <section id="form-section" class="hidden card">
-        <h2 id="form-title">Tambah PR Baru</h2>
-        <form id="pr-form">
-          <input type="text" id="mapel" placeholder="Mata pelajaran" required />
-          <textarea id="deskripsi" placeholder="Deskripsi PR" required></textarea>
-          <input type="date" id="tanggal" required />
-          <input type="hidden" id="pr-index" value="" />
-          <div class="btn-row">
-            <button type="submit" id="save-btn">Simpan</button>
-            <button type="button" id="cancel-btn">Batal</button>
-          </div>
-        </form>
-      </section>
-
-      <section class="card">
-        <div class="toolbar">
-          <input id="search" placeholder="Cari PR..." />
-          <div>
-            <button id="refresh-btn" title="Refresh">🔄</button>
-            <button id="clear-btn" title="Hapus Semua">🗑️ Hapus Semua</button>
-          </div>
+  <main>
+    <section id="form-section">
+      <h2 id="form-title">Tambah PR</h2>
+      <form id="pr-form">
+        <input type="text" id="mapel" placeholder="Mata pelajaran" required />
+        <textarea id="deskripsi" placeholder="Deskripsi PR" required></textarea>
+        <input type="date" id="tanggal" required />
+        <input type="hidden" id="pr-index" value="" />
+        <div class="btn-group">
+          <button type="submit">Simpan</button>
+          <button type="button" id="cancel-btn" class="hidden">Batal</button>
         </div>
+      </form>
+    </section>
 
-        <div id="loading" class="loading hidden">Loading...</div>
-        <div id="daftarPR" class="list"></div>
-      </section>
-    </main>
+    <section>
+      <h2>Daftar PR</h2>
+      <div id="daftarPR" class="list"></div>
+    </section>
+  </main>
 
-    <footer>
-      <small>Offline • Data disimpan di <code>pr.json</code></small>
-    </footer>
-  </div>
+  <footer>
+    <small>📁 Data disimpan otomatis di browser kamu</small>
+  </footer>
 
   <div id="toast" class="toast hidden"></div>
-
-  <audio id="backsound" loop>
-    <source src="https://cdn.pixabay.com/audio/2022/10/16/audio_12b8a5b6a8.mp3" type="audio/mpeg" />
-  </audio>
-
-  <script src="/app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
