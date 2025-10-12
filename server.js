@@ -1,40 +1,60 @@
-// ======== PENGINGAT PR - SERVER OFFLINE ========
-
 const express = require("express");
 const cors = require("cors");
-const bodyParser = require("body-parser");
 const fs = require("fs");
 const path = require("path");
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
+// static files (frontend)
+const PUBLIC_DIR = path.join(__dirname, "public");
+app.use(express.static(PUBLIC_DIR));
+
+// data file
 const DATA_FILE = path.join(__dirname, "pr.json");
 
-// 🔹 Endpoint untuk update / simpan PR ke file lokal
-app.post("/update-pr", (req, res) => {
-  const prData = req.body;
+// helper: ensure data file exists
+function ensureDataFile() {
+  if (!fs.existsSync(DATA_FILE)) {
+    fs.writeFileSync(DATA_FILE, "[]", "utf8");
+  }
+}
 
+// API: get PR list
+app.get("/api/pr", (req, res) => {
   try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(prData, null, 2));
-    res.json({ success: true, message: "Data berhasil disimpan lokal." });
+    ensureDataFile();
+    const raw = fs.readFileSync(DATA_FILE, "utf8");
+    const data = JSON.parse(raw || "[]");
+    res.json(data);
   } catch (err) {
-    console.error("❌ Gagal menyimpan:", err);
-    res.status(500).json({ success: false, error: "Gagal menyimpan data." });
+    console.error("Read error:", err);
+    res.status(500).json({ error: "Gagal membaca data." });
   }
 });
 
-// 🔹 Endpoint untuk baca data PR
-app.get("/get-pr", (req, res) => {
+// API: update PR list (replace entire list)
+app.post("/api/pr", (req, res) => {
   try {
-    if (!fs.existsSync(DATA_FILE)) fs.writeFileSync(DATA_FILE, "[]");
-    const data = fs.readFileSync(DATA_FILE);
-    res.json(JSON.parse(data));
+    const newData = req.body;
+    if (!Array.isArray(newData)) {
+      return res.status(400).json({ error: "Payload harus array." });
+    }
+    fs.writeFileSync(DATA_FILE, JSON.stringify(newData, null, 2), "utf8");
+    res.json({ success: true });
   } catch (err) {
-    res.status(500).json({ success: false, error: "Gagal membaca file." });
+    console.error("Write error:", err);
+    res.status(500).json({ error: "Gagal menyimpan data." });
   }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => console.log(`✅ Server lokal aktif di http://localhost:${PORT}`));
+// Fallback - serve index.html for any other request (SPA friendly)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, "index.html"));
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Server lokal aktif di http://localhost:${PORT}`);
+});
