@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pengingat PR X-2 — Admin</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>📘 Pengingat PR X-2 — Admin</h1>
+    <p>Masukkan tugas PR, atur tanggal, lalu tekan <b>Siarankan</b> agar muncul di halaman <code>siaran.html</code>.</p>
+
+    <form id="formPR">
+      <label>Mata Pelajaran</label>
+      <input type="text" id="mapel" placeholder="Contoh: Biologi" required>
+
+      <label>Deskripsi PR</label>
+      <textarea id="deskripsi" placeholder="Contoh: Membawa buah jangan lupa" required></textarea>
+
+      <label>Tanggal (Deadline)</label>
+      <input type="date" id="tanggal" required>
+
+      <button type="submit">💾 Simpan PR</button>
+    </form>
+
+    <hr>
+
+    <h2>📋 Daftar PR Tersimpan</h2>
+    <ul id="listPR"></ul>
+
+    <div class="btn-group">
+      <button id="siarankan">📢 Siarankan ke Publik</button>
+      <button id="hapus">🗑️ Hapus Semua</button>
+    </div>
+
+    <p class="note">Tips: File ini otomatis menyimpan data di browser (localStorage). Untuk menampilkan, buka <b>siaran.html</b>.</p>
+  </div>
+
+  <script>
+    const form = document.getElementById('formPR');
+    const list = document.getElementById('listPR');
+    const siarankan = document.getElementById('siarankan');
+    const hapus = document.getElementById('hapus');
+
+    // Ambil PR dari localStorage
+    let daftarPR = JSON.parse(localStorage.getItem('daftarPR')) || [];
+
+    // Fungsi render daftar PR
+    function renderPR() {
+      list.innerHTML = '';
+      if (daftarPR.length === 0) {
+        list.innerHTML = '<li><em>Belum ada PR disimpan</em></li>';
+        return;
+      }
+      daftarPR.forEach((pr, i) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<b>${pr.mapel}</b> — ${pr.deskripsi} <small>[${pr.tanggal}]</small>`;
+        list.appendChild(li);
+      });
+    }
+
+    // Saat form disubmit
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const pr = {
+        mapel: mapel.value.trim(),
+        deskripsi: deskripsi.value.trim(),
+        tanggal: tanggal.value
+      };
+      daftarPR.push(pr);
+      localStorage.setItem('daftarPR', JSON.stringify(daftarPR));
+      renderPR();
+      form.reset();
+    });
+
+    // Tombol siaran → simpan ke localStorage publik
+    siarankan.addEventListener('click', () => {
+      localStorage.setItem('siaranPR', JSON.stringify(daftarPR));
+      alert('✅ PR telah disiarkan! Cek di siaran.html');
+    });
+
+    // Tombol hapus semua
+    hapus.addEventListener('click', () => {
+      if (confirm('Yakin hapus semua PR?')) {
+        daftarPR = [];
+        localStorage.removeItem('daftarPR');
+        localStorage.removeItem('siaranPR');
+        renderPR();
+      }
+    });
+
+    renderPR();
+  </script>
+</body>
+</html>
