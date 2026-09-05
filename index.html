@@ -1,43 +1,334 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>📘 Pengingat PR Offline</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anyela</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,500&family=Caveat:wght@500;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #EAE3D3;
+    --paper-2: #E1D8C4;
+    --ink: #262523;
+    --ink-soft: #59554d;
+    --berry: #8B3A62;
+    --sage: #6C7A5D;
+    --mustard: #D9A441;
+    --tape: #D8CBB0;
+    --card: #F4EFE3;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background-color:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(38,37,35,0.06) 1px, transparent 0);
+    background-size: 18px 18px;
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    line-height:1.6;
+  }
+  .wrap{max-width:1000px; margin:0 auto; padding:0 24px;}
+
+  header{
+    padding:40px 0 10px;
+    text-align:center;
+  }
+  .eyebrow{
+    font-family:'Caveat', cursive;
+    font-size:22px;
+    color:var(--berry);
+    transform:rotate(-2deg);
+    display:inline-block;
+    margin-bottom:6px;
+  }
+  h1.title{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(36px,7vw,64px);
+    letter-spacing:-0.01em;
+  }
+  .intro{
+    max-width:56ch; margin:18px auto 0;
+    color:var(--ink-soft);
+    font-size:16px;
+  }
+
+  nav.tabs{
+    display:flex; justify-content:center; gap:10px; flex-wrap:wrap;
+    margin:34px 0 8px;
+  }
+  nav.tabs a{
+    font-family:'Work Sans', sans-serif;
+    font-size:13.5px; font-weight:600;
+    color:var(--ink);
+    text-decoration:none;
+    background:var(--tape);
+    padding:7px 16px;
+    border-radius:2px;
+    transform:rotate(-1deg);
+    transition:background .15s, transform .15s;
+  }
+  nav.tabs a:nth-child(even){transform:rotate(1deg);}
+  nav.tabs a:hover{background:var(--mustard); transform:rotate(0deg) translateY(-2px);}
+
+  section{padding:56px 0;}
+  .section-title{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:28px;
+    margin-bottom:30px;
+    text-align:center;
+  }
+
+  /* MOOD GRID - collage of photo placeholders */
+  .mood-grid{
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap:22px;
+    padding:10px 0;
+  }
+  .polaroid{
+    background:#fff;
+    padding:10px 10px 34px;
+    box-shadow:0 6px 16px rgba(38,37,35,0.18);
+    transition:transform .2s ease, box-shadow .2s ease;
+    position:relative;
+  }
+  .polaroid:nth-child(3n){transform:rotate(-3deg);}
+  .polaroid:nth-child(3n+1){transform:rotate(2deg);}
+  .polaroid:nth-child(3n+2){transform:rotate(-1.5deg);}
+  .polaroid:hover{transform:rotate(0deg) scale(1.04); box-shadow:0 10px 24px rgba(38,37,35,0.26); z-index:5;}
+  .polaroid .photo{
+    aspect-ratio:1/1;
+    background:linear-gradient(135deg, var(--paper-2), var(--tape));
+    display:flex; align-items:center; justify-content:center;
+    color:var(--ink-soft); font-size:12px; text-align:center; padding:8px;
+    font-family:'Work Sans', sans-serif;
+  }
+  .polaroid .cap{
+    font-family:'Caveat', cursive;
+    font-size:17px;
+    position:absolute; bottom:8px; left:0; right:0;
+    text-align:center;
+    color:var(--ink);
+  }
+
+  /* QUOTES */
+  .quote-row{
+    display:grid; grid-template-columns:1fr; gap:20px;
+  }
+  @media(min-width:700px){ .quote-row{grid-template-columns:1fr 1fr;} }
+  .quote-card{
+    background:var(--card);
+    border-left:4px solid var(--berry);
+    padding:22px 24px;
+    position:relative;
+  }
+  .quote-card p{
+    font-family:'Fraunces', serif;
+    font-style:italic;
+    font-size:19px;
+    line-height:1.5;
+    margin-bottom:10px;
+  }
+  .quote-card span{
+    font-family:'Work Sans', sans-serif;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    text-transform:none;
+  }
+
+  /* TRAITS as washi tags */
+  .trait-cloud{
+    display:flex; flex-wrap:wrap; gap:12px; justify-content:center;
+  }
+  .trait{
+    font-family:'Work Sans', sans-serif;
+    font-weight:500; font-size:14px;
+    padding:9px 18px;
+    border-radius:20px;
+    color:#fff;
+  }
+  .trait.c1{background:var(--berry);}
+  .trait.c2{background:var(--sage);}
+  .trait.c3{background:var(--mustard); color:var(--ink);}
+  .trait.c4{background:#4a5a6b;}
+
+  /* FLIP CARDS - values */
+  .flip-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:20px;
+  }
+  .flip{
+    perspective:1000px;
+    height:150px;
+  }
+  .flip-inner{
+    position:relative; width:100%; height:100%;
+    transition:transform .5s;
+    transform-style:preserve-3d;
+    cursor:pointer;
+  }
+  .flip:hover .flip-inner{transform:rotateY(180deg);}
+  .flip-front, .flip-back{
+    position:absolute; inset:0;
+    backface-visibility:hidden;
+    border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    padding:16px;
+  }
+  .flip-front{
+    background:var(--card);
+    font-family:'Fraunces', serif;
+    font-size:18px;
+    border:1px solid var(--paper-2);
+  }
+  .flip-back{
+    background:var(--ink);
+    color:var(--paper);
+    transform:rotateY(180deg);
+    font-size:13.5px;
+  }
+
+  /* PLAYLIST / MOOD BAR */
+  .mood-meter{
+    display:flex; flex-direction:column; gap:16px;
+    max-width:520px; margin:0 auto;
+  }
+  .meter-row{display:flex; align-items:center; gap:14px;}
+  .meter-row .lbl{
+    width:110px; font-size:13.5px; font-weight:600; flex-shrink:0;
+  }
+  .meter-track{
+    flex:1; height:10px; background:var(--paper-2); border-radius:20px; overflow:hidden;
+  }
+  .meter-fill{height:100%; border-radius:20px; background:var(--berry);}
+
+  footer{
+    text-align:center; padding:40px 0 60px;
+    font-family:'Caveat', cursive;
+    font-size:18px;
+    color:var(--ink-soft);
+  }
+
+  hr.tape-divider{
+    border:none;
+    height:22px;
+    background:repeating-linear-gradient(45deg, var(--tape), var(--tape) 10px, var(--paper-2) 10px, var(--paper-2) 20px);
+    margin:0 auto;
+    max-width:200px;
+    transform:rotate(-1deg);
+  }
+</style>
 </head>
 <body>
+
+<div class="wrap">
   <header>
-    <h1>📘 Pengingat PR Offline</h1>
-    <input type="text" id="search" placeholder="Cari mapel..." />
+    <span class="eyebrow">sekilas tentang</span>
+    <h1 class="title">Nama Kamu</h1>
+    <p class="intro">Kumpulan momen, kutipan favorit, dan hal-hal kecil yang menggambarkan siapa aku — bukan resume, cuma moodboard.</p>
   </header>
 
-  <main>
-    <section id="form-section">
-      <h2 id="form-title">Tambah PR</h2>
-      <form id="pr-form">
-        <input type="text" id="mapel" placeholder="Mata pelajaran" required />
-        <textarea id="deskripsi" placeholder="Deskripsi PR" required></textarea>
-        <input type="date" id="tanggal" required />
-        <input type="hidden" id="pr-index" value="" />
-        <div class="btn-group">
-          <button type="submit">Simpan</button>
-          <button type="button" id="cancel-btn" class="hidden">Batal</button>
-        </div>
-      </form>
-    </section>
+  <nav class="tabs">
+    <a href="#galeri">Galeri</a>
+    <a href="#quotes">Quotes</a>
+    <a href="#trait">Sifat</a>
+    <a href="#values">Values</a>
+    <a href="#mood">Mood</a>
+  </nav>
 
-    <section>
-      <h2>Daftar PR</h2>
-      <div id="daftarPR" class="list"></div>
-    </section>
-  </main>
+  <section id="galeri">
+    <h2 class="section-title">momen favorit</h2>
+    <div class="mood-grid">
+      <div class="polaroid"><div class="photo">ganti dengan foto kamu</div><div class="cap">pagi hari</div></div>
+      <div class="polaroid"><div class="photo">ganti dengan foto kamu</div><div class="cap">liburan kecil</div></div>
+      <div class="polaroid"><div class="photo">ganti dengan foto kamu</div><div class="cap">teman lama</div></div>
+      <div class="polaroid"><div class="photo">ganti dengan foto kamu</div><div class="cap">tempat favorit</div></div>
+      <div class="polaroid"><div class="photo">ganti dengan foto kamu</div><div class="cap">random moment</div></div>
+      <div class="polaroid"><div class="photo">ganti dengan foto kamu</div><div class="cap">self portrait</div></div>
+    </div>
+  </section>
 
-  <footer>
-    <small>📁 Data disimpan otomatis di browser kamu</small>
-  </footer>
+  <hr class="tape-divider">
 
-  <div id="toast" class="toast hidden"></div>
-  <script src="app.js"></script>
+  <section id="quotes">
+    <h2 class="section-title">kata-kata yang nempel</h2>
+    <div class="quote-row">
+      <div class="quote-card">
+        <p>"Ganti dengan kutipan favoritmu — bisa dari buku, film, atau kata-kata sendiri."</p>
+        <span>— sumber kutipan</span>
+      </div>
+      <div class="quote-card">
+        <p>"Kutipan kedua yang paling sering kamu ingat atau jadi pegangan."</p>
+        <span>— sumber kutipan</span>
+      </div>
+      <div class="quote-card">
+        <p>"Boleh juga kalimat buatanmu sendiri, tentang hidup atau cara kamu melihat sesuatu."</p>
+        <span>— kata sendiri</span>
+      </div>
+      <div class="quote-card">
+        <p>"Satu lagi, biar galeri kutipannya terasa penuh dan personal."</p>
+        <span>— sumber kutipan</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="tape-divider">
+
+  <section id="trait">
+    <h2 class="section-title">kalau aku warna, aku ini...</h2>
+    <div class="trait-cloud">
+      <span class="trait c1">pendengar yang baik</span>
+      <span class="trait c2">suka hal detail</span>
+      <span class="trait c3">gampang penasaran</span>
+      <span class="trait c4">tenang di keramaian</span>
+      <span class="trait c1">perfeksionis santai</span>
+      <span class="trait c2">suka sunyi pagi hari</span>
+      <span class="trait c3">kolektor ide random</span>
+    </div>
+  </section>
+
+  <hr class="tape-divider">
+
+  <section id="values">
+    <h2 class="section-title">hal yang aku pegang</h2>
+    <div class="flip-grid">
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-front">Jujur</div>
+        <div class="flip-back">Lebih suka bilang apa adanya, walau kadang nggak nyaman.</div>
+      </div></div>
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-front">Rasa ingin tahu</div>
+        <div class="flip-back">Selalu pengen tahu "kenapa" di balik sesuatu, bukan cuma "apa".</div>
+      </div></div>
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-front">Tumbuh pelan</div>
+        <div class="flip-back">Nggak buru-buru — asal terus jalan, itu cukup.</div>
+      </div></div>
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-front">Terhubung</div>
+        <div class="flip-back">Percaya hubungan yang tulus lebih penting dari pencapaian.</div>
+      </div></div>
+    </div>
+  </section>
+
+  <hr class="tape-divider">
+
+  <section id="mood">
+    <h2 class="section-title">mood harian (rata-rata)</h2>
+    <div class="mood-meter">
+      <div class="meter-row"><span class="lbl">Energik</span><div class="meter-track"><div class="meter-fill" style="width:65%; background:var(--mustard);"></div></div></div>
+      <div class="meter-row"><span class="lbl">Tenang</span><div class="meter-track"><div class="meter-fill" style="width:80%; background:var(--sage);"></div></div></div>
+      <div class="meter-row"><span class="lbl">Kreatif</span><div class="meter-track"><div class="meter-fill" style="width:90%;"></div></div></div>
+      <div class="meter-row"><span class="lbl">Sosial</span><div class="meter-track"><div class="meter-fill" style="width:45%; background:#4a5a6b;"></div></div></div>
+    </div>
+  </section>
+
+  <footer>dibuat dengan cerita, foto, dan sedikit perasaan — 2026</footer>
+</div>
+
 </body>
 </html>
